@@ -9,8 +9,9 @@ import Location from './Location';
 import Login from './Login';
 import NoPage from './NoPage';
 import Footer from './Footer';
-import ProductDetail from './ProductDetail'; // Import the new ProductDetail component
-import '@fontsource/montserrat'; // Default weight 400
+import ProductDetail from './ProductDetail'; 
+import JewelryDetail from './JewelryDetail'; 
+import '@fontsource/montserrat'; 
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
           <Route path="location" element={<Location />} />
           <Route path="signin" element={<Login />} />
           <Route path="product/:id" element={<ProductDetail />} />
+          <Route path="jewelry/:id" element={<JewelryDetail />} />
           <Route path="*" element={<NoPage />} />
         </Route>
       </Routes>

@@ -1,9 +1,9 @@
-import React,{useState,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import banner from "./assets/images/mg-banner.jpeg";
 
 const Home = () => {
-
   const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:3000/api/products")
@@ -16,10 +16,14 @@ const Home = () => {
       .then((data) => setProducts(data))
       .catch((err) => {
         console.error(err);
-        setProducts([]); // Fallback to an empty array
+        setProducts([]);
       });
   }, []);
-  
+
+  // Filter products based on the search term
+  const filteredProducts = products.filter((product) =>
+    product.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="font-montserrat">
@@ -51,30 +55,44 @@ const Home = () => {
         </p>
       </div>
 
+      
+     {/* Search Bar */}
+<div className="px-4 my-6">
+  <input
+    type="text"
+    placeholder="Search Products..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="w-full p-3 text-lg text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  />
+</div>
+
+
       {/* Diamond Jewelry Section */}
       <div className="pt-10 pb-10 bg-gray-50">
         <h1 className="text-3xl font-normal text-center text-gray-800 sm:text-4xl lg:text-5xl font-montserrat">
-          Diamond Jewelry
+          Diamond and Gold Jewelry
         </h1>
 
-        <div className="grid grid-cols-3 gap-8">
-      {products.map((product) => (
-        <a
-          key={product._id}
-          href={`/product/${product._id}`}
-          className="block p-4 bg-white border rounded shadow-lg"
-        >
-          <img
-            src={`http://localhost:3000${product.image}`}
-            alt={product.title}
-            className="object-cover w-full h-48 rounded"
-          />
-          <h3 className="mt-4 mb-2 text-xl font-medium">{product.title}</h3>
-          <h4 className="text-lg font-semibold text-gray-700">₹{product.price}</h4>
-        </a>
-      ))}
-    </div>
-
+        <div className="grid grid-cols-3 gap-8 m-5">
+          {filteredProducts.map((product) => (
+            <a
+              key={product._id}
+              href={`/product/${product._id}`}
+              className="block p-4 bg-white border rounded shadow-lg"
+            >
+              <img
+                src={`http://localhost:3000${product.image}`}
+                alt={product.title}
+                className="object-cover w-full h-48 rounded"
+              />
+              <h3 className="mt-4 mb-2 text-xl font-medium">{product.title}</h3>
+              <h4 className="text-lg font-semibold text-gray-700">
+                ₹{product.price}
+              </h4>
+            </a>
+          ))}
+        </div>
       </div>
     </div>
   );

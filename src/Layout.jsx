@@ -7,9 +7,9 @@ const Layout = () => {
   return (
     <>
       <nav className="bg-white shadow-lg font-montserrat">
-        <ul className="flex flex-wrap items-center justify-between p-5">
+        <ul className="flex items-center justify-between p-5">
           {/* Logo */}
-          <li>
+          <li className="flex-shrink-0">
             <Link to="/">
               <img 
                 src={logo} 
@@ -19,8 +19,8 @@ const Layout = () => {
             </Link>
           </li>
 
-          {/* Navigation Links */}
-          <ul className="flex flex-wrap items-center gap-4 md:gap-10">
+          {/* Centered Navigation Links */}
+          <ul className="flex justify-center flex-grow gap-4 md:gap-15">
             {/* Home */}
             <li>
               <Link 
@@ -68,8 +68,7 @@ const Layout = () => {
             </li>
           </ul>
 
-          SignIn/SignUp
-          <li className="flex items-center gap-2 animate-fade">
+         {/*  <li className="flex items-center gap-2 animate-fade">
             <Link 
               to="/signin" 
               className="flex items-center gap-2 text-sm text-gray-500 md:text-base"
@@ -81,7 +80,7 @@ const Layout = () => {
               />
               <h3>Login In</h3>
             </Link>
-          </li>
+          </li> */}
         </ul>
       </nav>
       <Outlet />

@@ -57,7 +57,7 @@ const ProductDetail = () => {
           </h2>
           <p className="mt-4 text-gray-600">{product.description}</p>
           <a href={mailtoLink}>
-            <button className="px-6 py-3 mt-6 text-white bg-blue-500 rounded-lg hover:bg-blue-600">
+            <button className="px-6 py-3 mt-6 text-white bg-black rounded-lg hover:bg-gray-500">
               Enquiry
             </button>
           </a>
