@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import banner from "./assets/images/mg-banner.jpeg";
 
 const Home = () => {
@@ -29,14 +30,11 @@ const Home = () => {
     <div className="font-montserrat">
       {/* Hero Section */}
       <div className="relative w-full min-h-screen mb-0">
-        {/* Background Image */}
         <img
           src={banner}
           alt="Mahesh Gems Banner"
           className="object-cover w-full h-[600px] opacity-4 border-l-neutral-300"
         />
-
-        {/* Banner Text */}
         <div className="absolute inset-0 flex flex-col items-center justify-center px-3 text-center text-white opacity-3">
           <h1 className="mb-3 text-3xl font-bold md:text-5xl lg:text-6xl">
             Mahesh Gems
@@ -55,30 +53,28 @@ const Home = () => {
         </p>
       </div>
 
-      
-     {/* Search Bar */}
-<div className="px-4 my-6">
-  <input
-    type="text"
-    placeholder="Search Products..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="w-full p-3 text-lg text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-  />
-</div>
-
+      {/* Search Bar */}
+      <div className="px-4 my-6">
+        <input
+          type="text"
+          placeholder="Search Products..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-3 text-lg text-black border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+      </div>
 
       {/* Diamond Jewelry Section */}
       <div className="pt-10 pb-10 bg-gray-50">
-        <h1 className="text-3xl font-normal text-center text-gray-800 sm:text-4xl lg:text-5xl font-montserrat">
+        <h1 className="text-3xl font-normal text-center text-gray-800 sm:text-4xl lg:text-5xl">
           Diamond and Gold Jewelry
         </h1>
 
         <div className="grid grid-cols-3 gap-8 m-5">
           {filteredProducts.map((product) => (
-            <a
+            <Link
               key={product._id}
-              href={`https://mahesh-gems.vercel.app/product/${product._id}`}
+              to={`/product/${product._id}`}
               className="block p-4 bg-white border rounded shadow-lg"
             >
               <img
@@ -90,7 +86,7 @@ const Home = () => {
               <h4 className="text-lg font-semibold text-gray-700">
                 ₹{product.price}
               </h4>
-            </a>
+            </Link>
           ))}
         </div>
       </div>

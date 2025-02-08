@@ -3,11 +3,10 @@ import { useParams } from "react-router-dom";
 
 const ProductDetail = () => {
   const { id } = useParams(); // Get product ID from the URL
-  const [product, setProduct] = useState(null); // State to store the product details
-  const [error, setError] = useState(null); // State for error handling
+  const [product, setProduct] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch product details by ID from the API
     fetch(`https://mahesh-gems-api.vercel.app/api/products/${id}`)
       .then((res) => {
         if (!res.ok) {
@@ -30,7 +29,7 @@ const ProductDetail = () => {
     return <div className="text-center">Loading...</div>;
   }
 
-  // Mailto link for enquiry with dynamic subject and product details
+  // Mailto link for enquiry
   const mailtoLink = `mailto:maheshgemsindia@gmail.com?subject=Enquiry%20about%20${encodeURIComponent(
     product.title
   )}&body=I%20am%20interested%20in%20the%20following%20product:%0A%0ATitle:%20${encodeURIComponent(
@@ -41,11 +40,10 @@ const ProductDetail = () => {
 
   return (
     <div className="font-montserrat">
-      {/* Product Detail Section */}
       <div className="grid grid-cols-1 gap-8 p-5 md:grid-cols-2">
         <div>
           <img
-            src={product.image} // Use image from the API
+            src={product.image}
             alt={product.title}
             className="object-cover w-full h-auto rounded-lg"
           />

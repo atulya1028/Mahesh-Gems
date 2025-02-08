@@ -8,7 +8,7 @@ const JewelryDetail = () => {
 
   useEffect(() => {
     // Fetch jewelry details by ID from the API
-    fetch(`http://localhost:3000/api/jewelry/${id}`)
+    fetch(`https://mahesh-gems-api.vercel.app/api/jewelry/${id}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("jewelry not found");

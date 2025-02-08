@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
+import {Link} from 'react-router-dom';
 
 const Jewelry = () => {
   const [jewelries, setJewelry] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/jewelry")
+    fetch("https://mahesh-gems-api.vercel.app/api/jewelry")
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch jewelry");
@@ -42,9 +43,9 @@ const Jewelry = () => {
       {/* Jewelry Grid Section */}
       <div className="text-center h-[300px] p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredJewelry.map((jewelry) => (
-          <a
+          <Link
             key={jewelry._id}
-            href={`/jewelry/${jewelry._id}`}
+            to={`/jewelry/${jewelry._id}`}
             className="block p-4 bg-white border rounded shadow-lg"
           >
             <img
@@ -54,7 +55,7 @@ const Jewelry = () => {
             />
             <h3 className="mt-4 mb-2 text-xl font-medium">{jewelry.title}</h3>
             <h4 className="text-lg font-semibold text-gray-700">₹{jewelry.price}</h4>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
