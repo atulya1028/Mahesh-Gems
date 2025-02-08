@@ -45,7 +45,7 @@ const ProductDetail = () => {
       <div className="grid grid-cols-1 gap-8 p-5 md:grid-cols-2">
         <div>
           <img
-            src={`http://localhost:3000${product.image}`} // Use image from the API
+            src={product.image} // Use image from the API
             alt={product.title}
             className="object-cover w-full h-auto rounded-lg"
           />
@@ -53,7 +53,7 @@ const ProductDetail = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-800">{product.title}</h1>
           <h2 className="mt-2 text-xl font-semibold text-gray-700">
-            {product.price}
+            ₹{product.price}
           </h2>
           <p className="mt-4 text-gray-600">{product.description}</p>
           <a href={mailtoLink}>

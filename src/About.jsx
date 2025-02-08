@@ -1,6 +1,6 @@
 import React from "react";
-import dj from './assets/images/diamond_jewellery.jpeg'
-import gj from './assets/images/gold_jewellery.jpeg';
+import dj from "./assets/images/diamond_jewellery.jpeg";
+import gj from "./assets/images/gold_jewellery.jpeg";
 
 const About = () => {
   return (
@@ -22,10 +22,19 @@ const About = () => {
           are dedicated to providing transparency, trust, and excellence in
           every purchase.
         </p>
-        <br /><br />
+        <br />
+        <br />
         <div className="flex items-center justify-evenly">
-        <img src={dj} alt="Diamond Jewellery" className="w-[400px] h-[400px] rounded-md"/>
-        <img src={gj} alt="Diamond Jewellery" className="w-[400px] h-[400px] rounded-md"/>
+          <img
+            src={dj}
+            alt="Diamond Jewellery"
+            className="w-[400px] h-[400px] rounded-md"
+          />
+          <img
+            src={gj}
+            alt="Diamond Jewellery"
+            className="w-[400px] h-[400px] rounded-md"
+          />
         </div>
       </div>
     </div>

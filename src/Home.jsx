@@ -82,7 +82,7 @@ const Home = () => {
               className="block p-4 bg-white border rounded shadow-lg"
             >
               <img
-                src={`http://localhost:3000${product.image}`}
+                src={product.image}
                 alt={product.title}
                 className="object-cover w-full h-48 rounded"
               />
