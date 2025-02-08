@@ -8,7 +8,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     // Fetch product details by ID from the API
-    fetch(`http://localhost:3000/api/products/${id}`)
+    fetch(`https://mahesh-gems-api.vercel.app/api/products/${id}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Product not found");

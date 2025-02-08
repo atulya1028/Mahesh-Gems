@@ -6,7 +6,7 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/products")
+    fetch("https://mahesh-gems-api.vercel.app/api/products")
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch products");
