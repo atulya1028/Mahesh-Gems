@@ -23,11 +23,11 @@ const ProductDetail = () => {
   }, [id]);
 
   if (error) {
-    return <div>{error}</div>;
+    return <div className="text-center">{error}</div>;
   }
 
   if (!product) {
-    return <div>Loading...</div>;
+    return <div className="text-center">Loading...</div>;
   }
 
   // Mailto link for enquiry with dynamic subject and product details

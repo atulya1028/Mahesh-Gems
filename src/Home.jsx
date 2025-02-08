@@ -78,7 +78,7 @@ const Home = () => {
           {filteredProducts.map((product) => (
             <a
               key={product._id}
-              href={`/product/${product._id}`}
+              href={`https://mahesh-gems.vercel.app/product/${product._id}`}
               className="block p-4 bg-white border rounded shadow-lg"
             >
               <img
