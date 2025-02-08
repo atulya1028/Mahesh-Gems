@@ -49,7 +49,7 @@ const Jewelry = () => {
             className="block p-4 bg-white border rounded shadow-lg"
           >
             <img
-              src={`http://localhost:3000${jewelry.image}`}
+              src={jewelry.image}
               alt={jewelry.title}
               className="object-cover w-full h-48 rounded"
             />
