@@ -3,15 +3,14 @@ import { useParams } from "react-router-dom";
 
 const JewelryDetail = () => {
   const { id } = useParams(); // Get jewelry ID from the URL
-  const [jewelry, setJewelry] = useState(null); // State to store the jewelry details
-  const [error, setError] = useState(null); // State for error handling
+  const [jewelry, setJewelry] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch jewelry details by ID from the API
     fetch(`https://mahesh-gems-api.vercel.app/api/jewelry/${id}`)
       .then((res) => {
         if (!res.ok) {
-          throw new Error("jewelry not found");
+          throw new Error("Jewelry not found");
         }
         return res.json();
       })
@@ -23,20 +22,17 @@ const JewelryDetail = () => {
   }, [id]);
 
   if (error) {
-    return <div className="m-[100px] text-center">{error}</div>;
+    return <div className="flex items-center justify-center h-screen text-xl text-red-500">{error}</div>;
   }
 
   if (!jewelry) {
     return (
-      <div role="status" className="flex items-center justify-center m-[250px]">
+      <div className="flex items-center justify-center h-screen">
         <svg
           aria-hidden="true"
-          class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+          className="w-10 h-10 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
           viewBox="0 0 100 101"
-          fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          width={300}
-          height={300}
         >
           <path
             d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
@@ -47,12 +43,11 @@ const JewelryDetail = () => {
             fill="currentFill"
           />
         </svg>
-        <span class="sr-only">Loading...</span>
       </div>
     );
   }
 
-  // Mailto link for enquiry with dynamic subject and jewelry details
+  // Mailto link for enquiry
   const mailtoLink = `mailto:maheshgemsindia@gmail.com?subject=Enquiry%20about%20${encodeURIComponent(
     jewelry.title
   )}&body=I%20am%20interested%20in%20the%20following%20jewelry:%0A%0ATitle:%20${encodeURIComponent(
@@ -62,27 +57,33 @@ const JewelryDetail = () => {
   )}%0ADescription:%20${encodeURIComponent(jewelry.description)}`;
 
   return (
-    <div className="font-montserrat h-[100vh]">
-      {/* jewelry Detail Section */}
-      <div className="grid grid-cols-1 gap-8 p-5 md:grid-cols-2">
-        <div>
+    <div className="container px-4 mx-auto mt-10 font-montserrat">
+      <div className="grid items-center grid-cols-1 gap-8 md:grid-cols-2">
+        {/* Image Section */}
+        <div className="flex justify-center">
           <img
-            src={jewelry.image} // Use image from the API
+            src={jewelry.image}
             alt={jewelry.title}
-            className="object-cover w-full h-auto rounded-lg"
+            className="object-cover w-full max-w-md rounded-lg shadow-lg"
           />
         </div>
+
+        {/* Jewelry Info Section */}
         <div>
           <h1 className="text-3xl font-bold text-gray-800">{jewelry.title}</h1>
-          <h2 className="mt-2 text-xl font-semibold text-gray-700">
+          <h2 className="mt-2 text-2xl font-semibold text-gray-700">
             ₹{jewelry.price}
           </h2>
           <p className="mt-4 text-gray-600">{jewelry.description}</p>
-          <a href={mailtoLink}>
-            <button className="px-6 py-3 mt-6 text-white bg-black rounded-lg hover:bg-gray-500">
-              Enquiry
-            </button>
-          </a>
+          
+          {/* Enquiry Button */}
+          <div className="mt-6">
+            <a href={mailtoLink}>
+              <button className="w-full px-6 py-3 text-lg font-medium text-white transition bg-black rounded-lg hover:bg-gray-600">
+                Enquire Now
+              </button>
+            </a>
+          </div>
         </div>
       </div>
     </div>

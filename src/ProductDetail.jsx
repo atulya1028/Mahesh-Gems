@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
 const ProductDetail = () => {
-  const { id } = useParams(); // Get product ID from the URL
+  const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [error, setError] = useState(null);
 
@@ -22,20 +22,20 @@ const ProductDetail = () => {
   }, [id]);
 
   if (error) {
-    return <div className="text-center">{error}</div>;
+    return <div className="p-5 text-center">{error}</div>;
   }
 
   if (!product) {
     return (
-      <div role="status" className="flex items-center justify-center m-[250px]">
+      <div role="status" className="flex items-center justify-center h-screen">
         <svg
           aria-hidden="true"
-          class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+          className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          width={300}
-          height={300}
+          width={100}
+          height={100}
         >
           <path
             d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
@@ -46,12 +46,10 @@ const ProductDetail = () => {
             fill="currentFill"
           />
         </svg>
-        <span class="sr-only">Loading...</span>
       </div>
     );
   }
 
-  // Mailto link for enquiry
   const mailtoLink = `mailto:maheshgemsindia@gmail.com?subject=Enquiry%20about%20${encodeURIComponent(
     product.title
   )}&body=I%20am%20interested%20in%20the%20following%20product:%0A%0ATitle:%20${encodeURIComponent(
@@ -61,23 +59,27 @@ const ProductDetail = () => {
   )}%0ADescription:%20${encodeURIComponent(product.description)}`;
 
   return (
-    <div className="font-montserrat">
-      <div className="grid grid-cols-1 gap-8 p-5 md:grid-cols-2">
-        <div>
+    <div className="px-4 py-8 font-montserrat sm:px-6 lg:px-12">
+      <div className="grid items-center max-w-6xl grid-cols-1 gap-8 mx-auto lg:grid-cols-2">
+        <div className="flex justify-center">
           <img
             src={product.image}
             alt={product.title}
-            className="object-cover w-full h-auto rounded-lg"
+            className="object-cover w-full max-w-[500px] h-auto rounded-lg shadow-lg"
           />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">{product.title}</h1>
-          <h2 className="mt-2 text-xl font-semibold text-gray-700">
+          <h1 className="text-2xl font-bold text-gray-800 sm:text-3xl">
+            {product.title}
+          </h1>
+          <h2 className="mt-2 text-lg font-semibold text-gray-700 sm:text-xl">
             ₹{product.price}
           </h2>
-          <p className="mt-4 text-gray-600">{product.description}</p>
+          <p className="mt-4 text-sm text-gray-600 sm:text-base">
+            {product.description}
+          </p>
           <a href={mailtoLink}>
-            <button className="px-6 py-3 mt-6 text-white bg-black rounded-lg hover:bg-gray-500">
+            <button className="w-full px-6 py-3 mt-6 text-white transition bg-black rounded-lg sm:w-auto hover:bg-gray-600">
               Enquiry
             </button>
           </a>

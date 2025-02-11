@@ -8,7 +8,7 @@ import About from './About';
 import Location from './Location';
 import Login from './Login';
 import NoPage from './NoPage';
-import Footer from './Footer';
+
 import ProductDetail from './ProductDetail'; 
 import JewelryDetail from './JewelryDetail'; 
 import '@fontsource/montserrat'; 

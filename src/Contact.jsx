@@ -7,32 +7,38 @@ const Contact = () => {
   const whatsappNo = "919352829421";
 
   return (
-    <div className="m-[15%] font-montserrat">
-      <div className="flex flex-col items-center justify-center text-center">
-        <p>For any queries and questions, please inform us at:</p>
-        <br />
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-10 font-montserrat">
+      <div className="max-w-xl text-center">
+        <p className="text-lg font-medium text-gray-800 sm:text-xl">
+          For any queries and questions, please contact us:
+        </p>
       </div>
-      <div className="flex items-center justify-center gap-10 text-center">
-        <div className="m-1">
-          <a
-            href={`mailto:${email}`}
-            className="flex flex-col items-center justify-center text-center "
-          >
-            <img src={gmail} alt="Gmail" className="w-[40px] h-[40px]" />
-            <br />
-            {email}
-          </a>
-        </div>
-        <div className="m-1">
-          <a
-            href={`https://wa.me/${whatsappNo}`}
-            className="flex flex-col items-center justify-center text-center "
-          >
-            <img src={whatsapp} alt="Gmail" className="w-[40px] h-[40px]" />
-            <br />
-            {whatsappNo}
-          </a>
-        </div>
+      <div className="flex flex-col items-center justify-center w-full gap-6 mt-6 sm:flex-row sm:gap-12">
+        {/* Gmail */}
+        <a
+          href={`mailto:${email}`}
+          className="flex flex-col items-center justify-center text-center transition-transform transform hover:scale-105"
+        >
+          <img
+            src={gmail}
+            alt="Gmail"
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+          <p className="mt-2 text-sm text-gray-700 sm:text-base">{email}</p>
+        </a>
+
+        {/* WhatsApp */}
+        <a
+          href={`https://wa.me/${whatsappNo}`}
+          className="flex flex-col items-center justify-center text-center transition-transform transform hover:scale-105"
+        >
+          <img
+            src={whatsapp}
+            alt="WhatsApp"
+            className="w-12 h-12 sm:w-16 sm:h-16"
+          />
+          <p className="mt-2 text-sm text-gray-700 sm:text-base">{whatsappNo}</p>
+        </a>
       </div>
     </div>
   );
