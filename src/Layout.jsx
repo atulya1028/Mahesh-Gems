@@ -26,27 +26,37 @@ const Layout = () => {
             className="block p-2 text-gray-900 md:hidden"
             onClick={() => setIsOpen(!isOpen)}
           >
-            {isOpen ? <X size={30} /> : <Menu size={30} />}
+            {isOpen ?'' : <Menu size={30} />}
           </button>
 
           {/* Navigation Links */}
           <ul className={`md:flex md:items-center md:space-x-6 absolute md:static left-0 top-16 w-full bg-white md:w-auto md:bg-transparent shadow-md md:shadow-none transition-all duration-300 ease-in-out ${
             isOpen ? "block" : "hidden md:flex"
           }`}>
+            {/* Close Button inside the Sidebar */}
+            {isOpen && (
+              <button 
+                className="absolute p-2 text-gray-900 top-4 right-4 md:hidden"
+                onClick={() => setIsOpen(false)}
+              >
+                <X size={30} className="text-red-600" />
+              </button>
+            )}
+
             <li className="border-b md:border-none">
-              <Link to="/" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base">Home</Link>
+              <Link to="/" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base" onClick={() => setIsOpen(false)}>Home</Link>
             </li>
             <li className="border-b md:border-none">
-              <Link to="/jewelry" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base">Jewelry</Link>
+              <Link to="/jewelry" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base" onClick={() => setIsOpen(false)}>Jewelry</Link>
             </li>
             <li className="border-b md:border-none">
-              <Link to="/about" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base">About Us</Link>
+              <Link to="/about" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base" onClick={() => setIsOpen(false)}>About Us</Link>
             </li>
             <li className="border-b md:border-none">
-              <Link to="/contact" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base">Contact Us</Link>
+              <Link to="/contact" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base" onClick={() => setIsOpen(false)}>Contact Us</Link>
             </li>
             <li className="border-b md:border-none">
-              <Link to="/location" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base">Location</Link>
+              <Link to="/location" className="block p-4 text-sm md:p-3 hover:text-indigo-600 md:text-base" onClick={() => setIsOpen(false)}>Location</Link>
             </li>
           </ul>
         </div>
