@@ -11,7 +11,7 @@ const Layout = () => {
     <div className="flex flex-col">
       <br /> <br /> <br />
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 z-50 w-full bg-white shadow-lg font-montserrat">
+      <nav className="fixed top-0 left-0 z-50 w-full bg-white shadow-sm font-montserrat">
         <div className="container flex items-center justify-between p-2 mx-auto">
           {/* Logo */}
           <Link to="/">

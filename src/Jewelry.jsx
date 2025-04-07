@@ -2,6 +2,7 @@ import Lottie from "lottie-react";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import loader from "./assets/loading.json";
+import emptyBox from "./assets/empty_box.json"
 
 const Jewelry = () => {
   const [jewelries, setJewelry] = useState([]);
@@ -88,16 +89,18 @@ const Jewelry = () => {
         </h1>
 
         {/* Loading & Error Handling */}
-        {loading && <div className="flex justify-center items-center h-[50vh]">
-         <div className="w-96">
-         <Lottie animationData={loader} loop={true} autoPlay={true} style={{backgroundColor:"white"}}/>
-         </div>
-          </div>}
+        {
+        loading && <div className="flex justify-center items-center h-[50vh]">
+          <div className="w-96">
+            <Lottie animationData={loader} loop={true} autoPlay={true} style={{ backgroundColor: "white" }} />
+          </div>
+        </div>
+        }
         {error && <p className="text-center text-red-600">{error}</p>}
 
         {/* Product Grid */}
         {!loading && !error && (
-          <div className="grid grid-cols-1 gap-6 mt-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 mt-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {filteredJewelry.length > 0 ? (
               filteredJewelry.map((jewelry) => (
                 <Link
@@ -117,9 +120,12 @@ const Jewelry = () => {
                 </Link>
               ))
             ) : (
-              <p className="text-center text-gray-500 col-span-full">
-                No jewelry found.
-              </p>
+              <div className="flex flex-col items-center justify-center text-center text-gray-500 col-span-full">
+                <div className="w-50 sm:w-100">
+                  <Lottie animationData={emptyBox} loop={true} autoPlay={true} />
+                </div>
+                <p className="mt-1 text-4xl">No jewelry matches your search.</p>
+              </div>
             )}
           </div>
         )}
