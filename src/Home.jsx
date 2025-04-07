@@ -101,9 +101,6 @@ const Home = () => {
               alt="Mahesh Gems Banner"
               className="object-fill w-full h-[150px] sm:h-[300px] md:h-[300px] lg:h-[300px]"
             />
-            <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
-           
-            </div>
           </div>
 
           <div className="w-full overflow-hidden bg-gray-800 py-[1px] shadow-lg">
