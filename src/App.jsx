@@ -9,7 +9,6 @@ import Location from './Location';
 import Login from './Login';
 import NoPage from './NoPage';
 
-import ProductDetail from './ProductDetail'; 
 import JewelryDetail from './JewelryDetail'; 
 import '@fontsource/montserrat'; 
 
@@ -24,7 +23,6 @@ const App = () => {
           <Route path="about" element={<About />} />
           <Route path="location" element={<Location />} />
           <Route path="signin" element={<Login />} />
-          <Route path="product/:id" element={<ProductDetail />} />
           <Route path="jewelry/:id" element={<JewelryDetail />} />
           <Route path="*" element={<NoPage />} />
         </Route>

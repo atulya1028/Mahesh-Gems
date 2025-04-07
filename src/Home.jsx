@@ -3,107 +3,148 @@ import { Link } from "react-router-dom";
 import banner from "./assets/images/mg-banner.jpeg";
 
 const Home = () => {
-  const [products, setProducts] = useState([]);
+  const [jewelry, setJewelry] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [priceFilter, setPriceFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch("https://mahesh-gems-api.vercel.app/api/products")
+    fetch("https://mahesh-gems-api.vercel.app/api/jewelry")
       .then((res) => {
         if (!res.ok) {
-          throw new Error("Failed to fetch products");
+          throw new Error("Failed to fetch jewelry");
         }
         return res.json();
       })
       .then((data) => {
-        setProducts(data);
+        setJewelry(data);
         setLoading(false);
       })
       .catch((err) => {
         console.error(err);
-        setError("Failed to load products.");
+        setError("Failed to load jewelry.");
         setLoading(false);
       });
   }, []);
 
-  // Filter products based on the search term
-  const filteredProducts = products.filter((product) =>
-    product.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredJewelry = jewelry.filter((item) => {
+    const matchesSearch = item.title
+      .toLowerCase()
+      .includes(searchTerm.trim().toLowerCase());
+
+    const matchesPrice =
+      priceFilter === "all"
+        ? true
+        : priceFilter === "low"
+          ? item.price <= 75000
+          : priceFilter === "medium"
+            ? item.price > 75001 && item.price <= 100000
+            : item.price > 100001;
+
+    return matchesSearch && matchesPrice;
+  });
 
   return (
     <div className="font-montserrat">
-      {/* Banner Section */}
-      <div className="relative w-full">
-        <img
-          src={banner}
-          alt="Mahesh Gems Banner"
-          className="object-cover w-full h-[250px] sm:h-[350px] md:h-[500px] lg:h-[600px]"
-        />
-        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white bg-black bg-opacity-50">
-          <h1 className="mb-3 text-3xl font-bold sm:text-4xl md:text-5xl lg:text-6xl">
-            Mahesh Gems
-          </h1>
-          <p className="max-w-3xl text-sm sm:text-lg md:text-xl lg:text-2xl">
-            Crafting timeless beauty with exquisite gemstones and jewelry
-          </p>
+      {/* Filter/Search Bar */}
+      <section className="px-4 py-4 bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-4 mx-auto max-w-7xl">
+          {/* Search Bar */}
+          <div className="flex justify-center flex-1">
+            <div className="w-full max-w-[700px]">
+              <input
+                type="text"
+                placeholder="Search jewelry..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Filter Dropdown */}
+          <div className="w-[150px] sm:w-[180px]">
+            <select
+              value={priceFilter}
+              onChange={(e) => setPriceFilter(e.target.value)}
+              className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
+            >
+              <option value="all">All Prices</option>
+              <option value="low">Below ₹75,000</option>
+              <option value="medium">₹75,001 - ₹1,00,000</option>
+              <option value="high">Above ₹1,00,001</option>
+            </select>
+          </div>
         </div>
-      </div>
+      </section>
+      <br />
 
-      {/* Marquee Section */}
-      <div className="w-full py-2 overflow-hidden bg-gray-800">
-        <p className="text-sm font-semibold text-white sm:text-lg animate-marquee whitespace-nowrap">
-          Welcome to Mahesh Gems | Explore Our Latest Collection | Timeless Jewelry for Every Occasion | Contact Us Today!
-        </p>
-      </div>
+      {/* Banner and Marquee */}
+      {searchTerm.trim() === "" && priceFilter === "all" && (
+        <>
+          <div className="relative w-full">
+            <img
+              src={banner}
+              alt="Mahesh Gems Banner"
+              className="object-cover w-full h-[200px] sm:h-[300px] md:h-[400px] lg:h-[380px]"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white bg-black bg-opacity-50">
+              <h1 className="mb-3 text-2xl font-bold sm:text-4xl md:text-5xl">
+                Mahesh Gems
+              </h1>
+              <p className="max-w-3xl text-sm sm:text-lg md:text-xl">
+                Crafting timeless beauty with exquisite gemstones and jewelry
+              </p>
+            </div>
+          </div>
 
-      {/* Search Bar */}
-      <div className="px-4 my-6">
-        <input
-          type="text"
-          placeholder="Search Products..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-3 text-base border rounded-lg sm:text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-      </div>
+          <div className="w-full overflow-hidden bg-gray-800 py-[1px]">
+            <p className="text-sm font-semibold text-white sm:text-base animate-marquee whitespace-nowrap">
+              Welcome to Mahesh Gems | Explore Our Latest Collection | Timeless
+              Jewelry for Every Occasion | Contact Us Today!
+            </p>
+          </div>
+        </>
+      )}
 
-      {/* Diamond Jewelry Section */}
-      <div className="py-10 bg-gray-50">
-        <h1 className="text-2xl font-semibold text-center text-gray-800 sm:text-3xl md:text-4xl lg:text-5xl">
+      {/* Jewelry Listing */}
+      <div className="px-4 py-10 bg-gray-50">
+        <h1 className="text-2xl font-semibold text-center text-gray-800 sm:text-3xl md:text-4xl">
           Diamond and Gold Jewelry
         </h1>
 
-        {/* Loading Indicator */}
-        {loading && <p className="mt-4 text-center text-gray-600">Loading products...</p>}
-
-        {/* Error Message */}
+        {loading && (
+          <p className="mt-4 text-center text-gray-600">Loading jewelry...</p>
+        )}
         {error && <p className="mt-4 text-center text-red-600">{error}</p>}
 
-        {/* Product Grid */}
         {!loading && !error && (
-          <div className="grid grid-cols-1 gap-6 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => (
+          <div className="grid grid-cols-1 gap-6 mt-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {filteredJewelry.length > 0 ? (
+              filteredJewelry.map((item) => (
                 <Link
-                  key={product._id}
-                  to={`/product/${product._id}`}
-                  className="block p-4 transition bg-white border rounded-lg shadow-lg hover:shadow-xl"
+                  key={item._id}
+                  to={`/jewelry/${item._id}`}
+                  className="block p-4 transition bg-white border rounded-lg shadow hover:shadow-md"
                 >
                   <img
-                    src={product.image || "https://via.placeholder.com/300"}
-                    alt={product.title}
+                    src={item.image || "https://via.placeholder.com/300"}
+                    alt={item.title}
                     className="object-cover w-full h-48 rounded"
                   />
-                  <h3 className="mt-4 mb-2 text-lg font-medium sm:text-xl">{product.title}</h3>
-                  <h4 className="font-semibold text-gray-700 text-md sm:text-lg">
-                    ₹{product.price}
+                  <h3 className="mt-3 font-medium text-md sm:text-lg">
+                    {item.title}
+                  </h3>
+                  <h4 className="mt-1 text-sm font-semibold text-gray-700 sm:text-base">
+                    ₹{item.price}
                   </h4>
                 </Link>
               ))
             ) : (
-              <p className="text-center text-gray-500 col-span-full">No products found.</p>
+              <p className="text-center text-gray-500 col-span-full">
+                No jewelry found.
+              </p>
             )}
           </div>
         )}
