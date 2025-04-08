@@ -18,7 +18,7 @@ const Layout = () => {
             <img 
               src={logo} 
               alt="Mahesh Gems" 
-              className="w-[150px] h-[80px] sm:w-[200px] sm:h-[120px] md:w-[180px] md:h-[100px] animate-fade"
+              className="w-[150px] h-[130px] sm:w-[200px] sm:h-[120px] md:w-[180px] md:h-[150px] animate-fade"
 
             />
           </Link>
