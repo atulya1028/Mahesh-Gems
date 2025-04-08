@@ -39,18 +39,19 @@ const Jewelry = () => {
       priceFilter === "all"
         ? true
         : priceFilter === "low"
-          ? jewelry.price <= 10000
+          ? jewelry.price <= 800
           : priceFilter === "medium"
-            ? jewelry.price > 10000 && jewelry.price <= 50000
-            : jewelry.price > 50000;
+            ? jewelry.price > 801 && jewelry.price <= 1100
+            : jewelry.price > 1101;
 
     return matchesSearch && matchesPrice;
   });
 
   return (
     <div className="font-montserrat">
+      <br />
       {/* Search & Filter Section */}
-      <section className="px-4 py-4 bg-white shadow-sm">
+      <section className="px-4 py-4 bg-white shadow-2xl">
         <div className="flex flex-wrap items-center justify-between gap-4 mx-auto max-w-7xl">
           {/* Search Bar - Centered */}
           <div className="flex justify-center flex-1">
@@ -73,9 +74,9 @@ const Jewelry = () => {
               className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-1 focus:ring-indigo-500 focus:outline-none"
             >
               <option value="all">All Prices</option>
-              <option value="low">Below ₹10,000</option>
-              <option value="medium">₹10,001 - ₹50,000</option>
-              <option value="high">Above ₹50,000</option>
+              <option value="low">Below ₹800</option>
+              <option value="medium">₹801 - 1,100</option>
+              <option value="high">Above ₹1,101</option>
             </select>
           </div>
         </div>

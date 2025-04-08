@@ -40,10 +40,10 @@ const Home = () => {
       priceFilter === "all"
         ? true
         : priceFilter === "low"
-          ? item.price <= 75000
+          ? item.price <= 800
           : priceFilter === "medium"
-            ? item.price > 75001 && item.price <= 100000
-            : item.price > 100001;
+            ? item.price > 8001 && item.price <= 1100
+            : item.price > 1101;
 
     return matchesSearch && matchesPrice;
   });
@@ -84,9 +84,9 @@ const Home = () => {
               className="w-full p-2 text-sm border border-gray-300 rounded-md shadow-lg focus:ring-1 focus:border-gray-300 focus:outline-none"
             >
               <option value="all">All Prices</option>
-              <option value="low">Below ₹75,000</option>
-              <option value="medium">₹75,001 - ₹1,00,000</option>
-              <option value="high">Above ₹1,00,001</option>
+              <option value="low">Below ₹800</option>
+              <option value="medium">₹801 - ₹1,100</option>
+              <option value="high">Above ₹1,101</option>
             </select>
           </div>
         </div>
