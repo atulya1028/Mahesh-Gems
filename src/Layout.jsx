@@ -11,14 +11,15 @@ const Layout = () => {
     <div className="flex flex-col">
       <br /> <br /> <br />
       {/* Navbar */}
-      <nav className="fixed top-0 left-0 z-50 w-full bg-white shadow-sm font-montserrat">
+      <nav className="fixed top-0 left-0 z-50 w-full bg-white shadow-md font-montserrat">
         <div className="container flex items-center justify-between p-2 mx-auto">
           {/* Logo */}
           <Link to="/">
             <img 
               src={logo} 
               alt="Mahesh Gems" 
-              className="w-[120px] h-[60px] md:w-[200px] md:h-[120px] animate-fade" 
+              className="w-[150px] h-[80px] sm:w-[200px] sm:h-[120px] md:w-[180px] md:h-[100px] animate-fade"
+
             />
           </Link>
 

@@ -50,6 +50,7 @@ const Home = () => {
 
   return (
     <div className="relative font-montserrat">
+      <br />
       {/* Full-page Loader */}
       {loading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-white">
@@ -126,7 +127,7 @@ const Home = () => {
         {!loading && !error && (
           <div className="grid grid-cols-1 gap-6 mt-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filteredJewelry.length > 0 ? (
-              filteredJewelry.slice(0, 6).map((item) => (
+              filteredJewelry.slice(0, 10).map((item) => (
                 <Link
                   key={item._id}
                   to={`/jewelry/${item._id}`}
