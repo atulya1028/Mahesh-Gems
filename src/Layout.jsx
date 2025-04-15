@@ -12,7 +12,6 @@ const Layout = () => {
   const dropdownRef = useRef();
   const navigate = useNavigate();
 
-  // Handles logout
   const handleLogout = () => {
     localStorage.clear();
     setIsLoggedIn(false);
@@ -21,7 +20,6 @@ const Layout = () => {
     navigate("/");
   };
 
-  // Checks and updates login state from localStorage
   const updateLoginState = () => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true";
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -29,23 +27,17 @@ const Layout = () => {
     setUser(userData);
   };
 
-  // Check on first render
   useEffect(() => {
     updateLoginState();
-
-    // Listen for custom event from Login.jsx
     const handleLoginEvent = () => {
       updateLoginState();
     };
-
     window.addEventListener("loginSuccess", handleLoginEvent);
-
     return () => {
       window.removeEventListener("loginSuccess", handleLoginEvent);
     };
   }, []);
 
-  // Close dropdown if clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -62,8 +54,16 @@ const Layout = () => {
     <div className="flex flex-col">
       <br /> <br /> <br />
       <nav className="fixed top-0 left-0 z-50 w-full bg-white shadow-sm font-montserrat">
-        <div className="container flex items-center justify-between p-2 mx-auto">
-          <Link to="/">
+        <div className="container flex items-center justify-between p-2 mx-auto md:justify-between">
+          {/* Mobile Menu Icon - Top Left */}
+          <div className="mr-2 md:hidden">
+            <button onClick={() => setIsOpen(true)}>
+              <Menu size={24} className="text-gray-900" />
+            </button>
+          </div>
+
+          {/* Logo */}
+          <Link to="/" className="flex-grow md:flex-grow-0">
             <img
               src={logo}
               alt="Mahesh Gems"
@@ -71,26 +71,18 @@ const Layout = () => {
             />
           </Link>
 
-          <button
-            className="block p-1 text-gray-900 md:hidden"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? "" : <Menu size={24} />}
-          </button>
-
           <div className="flex items-center space-x-4">
             <ul
-              className={`md:flex md:items-center md:space-x-4 absolute md:static left-0 top-12 w-full bg-white md:w-auto md:bg-transparent shadow-md md:shadow-none transition-all duration-300 ease-in-out ${
+              className={`md:flex md:items-center md:space-x-4 absolute md:static left-0 top-16 w-full bg-white md:w-auto md:bg-transparent shadow-md md:shadow-none transition-all duration-300 ease-in-out z-40 ${
                 isOpen ? "block" : "hidden md:flex"
               }`}
             >
               {isOpen && (
-                <button
-                  className="absolute p-2 text-gray-900 top-3 right-3 md:hidden"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <X size={24} className="text-red-600" />
-                </button>
+                <div className="flex justify-end p-4 md:hidden">
+                  <button onClick={() => setIsOpen(false)}>
+                    <X size={28} className="text-gray-700 transition-all duration-200 hover:text-red-500" />
+                  </button>
+                </div>
               )}
 
               {["/", "/jewelry", "/about", "/contact", "/location"].map((path, idx) => {
@@ -99,7 +91,7 @@ const Layout = () => {
                   <li key={path} className="border-b md:border-none">
                     <Link
                       to={path}
-                      className="block p-2 text-base md:p-2 hover:bg-[rgb(212,166,75)] md:text-lg hover:rounded-md hover:text-white"
+                      className="block px-6 py-3 text-base text-gray-700 hover:bg-[rgb(212,166,75)] md:p-2 md:text-lg hover:rounded-md hover:text-white transition-all duration-200"
                       onClick={() => setIsOpen(false)}
                     >
                       {names[idx]}
@@ -109,7 +101,7 @@ const Layout = () => {
               })}
             </ul>
 
-            {/* Account Menu */}
+            {/* User Account Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -133,7 +125,6 @@ const Layout = () => {
                 </svg>
               </button>
 
-              {/* Dropdown content */}
               {dropdownOpen && (
                 <div className="absolute right-0 z-10 w-56 mt-2 bg-white border border-gray-200 rounded-md shadow-lg">
                   {isLoggedIn ? (
