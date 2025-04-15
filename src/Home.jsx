@@ -17,7 +17,7 @@ const Home = () => {
   const filterRef = useRef();
 
   useEffect(() => {
-    fetch("https://mahesh-gems-api.vercel.app/api/jewelry")
+    fetch("http://localhost:3000/api/jewelry")
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch jewelry");
