@@ -11,7 +11,7 @@ const Login = () => {
     e.preventDefault();
     try {
       // Making the login API call using fetch
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
