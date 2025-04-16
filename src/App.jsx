@@ -12,6 +12,7 @@ import NoPage from './NoPage';
 
 import JewelryDetail from './JewelryDetail'; 
 import '@fontsource/montserrat'; 
+import ForgotPassword from './ForgotPassword';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
           <Route path="about" element={<About />} />
           <Route path="location" element={<Location />} />
           <Route path="login" element={<Login />} />
+          <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="signup" element={<SignUp/>} />
           <Route path="jewelry/:id" element={<JewelryDetail />} />
           <Route path="*" element={<NoPage />} />
