@@ -40,7 +40,10 @@ const ResetPassword = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || "Something went wrong.");
+        if (data.message) {
+          throw new Error(data.message);  // More specific error message
+        }
+        throw new Error("Something went wrong. Please try again.");
       }
 
       setMessage(data.message);
