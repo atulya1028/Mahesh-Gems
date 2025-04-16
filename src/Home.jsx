@@ -225,7 +225,6 @@ const Home = () => {
           </div>
         )}
       </div>
-      {/* <div>Width ---- {window.innerWidth}</div> */}
     </div>
   );
 };
