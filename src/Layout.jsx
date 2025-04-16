@@ -52,17 +52,14 @@ const Layout = () => {
 
   return (
     <div className="flex flex-col">
-      <br /> <br /> <br />
       <nav className="fixed top-0 left-0 z-50 w-full bg-white shadow-sm font-montserrat">
         <div className="container flex items-center justify-between p-2 mx-auto md:justify-between">
-          {/* Mobile Menu Icon - Top Left */}
           <div className="mr-2 md:hidden">
             <button onClick={() => setIsOpen(true)}>
               <Menu size={24} className="text-gray-900" />
             </button>
           </div>
 
-          {/* Logo */}
           <Link to="/" className="flex-grow md:flex-grow-0">
             <img
               src={logo}
@@ -80,19 +77,18 @@ const Layout = () => {
               {isOpen && (
                 <div className="flex justify-end p-4 md:hidden">
                   <button onClick={() => setIsOpen(false)}>
-                    <X size={28} className="text-gray-700 transition-all duration-200 hover:text-red-500" />
+                    <X size={28} className="text-gray-700 hover:text-red-500" />
                   </button>
                 </div>
               )}
 
-              {/* Navigation Links */}
               {["/", "/jewelry", "/about", "/contact", "/location"].map((path, idx) => {
                 const names = ["Home", "Jewelry", "About Us", "Contact Us", "Location"];
                 return (
                   <li key={path} className="border-b md:border-none">
                     <Link
                       to={path}
-                      className="block px-6 py-3 text-base text-gray-700 hover:bg-[rgb(212,166,75)] md:p-2 md:text-lg hover:rounded-md hover:text-white transition-all duration-200 md:whitespace-nowrap"
+                      className="block px-6 py-3 text-base text-gray-700 hover:bg-[rgb(212,166,75)] md:p-2 md:text-lg hover:rounded-md hover:text-white transition-all duration-200"
                       onClick={() => setIsOpen(false)}
                     >
                       {names[idx]}
@@ -102,14 +98,14 @@ const Layout = () => {
               })}
             </ul>
 
-            {/* User Account Dropdown */}
+            {/* User Dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center p-2 space-x-1 text-sm font-medium text-gray-700 transition-colors rounded-md md:text-base hover:bg-gray-100"
               >
                 <User size={20} className="text-gray-600" />
-                <span>{isLoggedIn ? `Hi, ${user?.name}` : "My Account"}</span>
+                <span>{isLoggedIn && user?.name ? `Hi, ${user.name}` : "My Account"}</span>
                 <svg
                   className="w-4 h-4 ml-1"
                   fill="none"

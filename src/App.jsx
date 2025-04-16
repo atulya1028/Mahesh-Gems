@@ -8,11 +8,12 @@ import About from './About';
 import Location from './Location';
 import Login from './Login';
 import SignUp from './SignUp';
+import ForgotPassword from './ForgotPassword';
 import NoPage from './NoPage';
 
 import JewelryDetail from './JewelryDetail'; 
 import '@fontsource/montserrat'; 
-import ForgotPassword from './ForgotPassword';
+
 
 const App = () => {
   return (

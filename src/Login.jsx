@@ -4,13 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState(""); // For error handling
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      // Making the login API call using fetch
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/login", {
         method: "POST",
         headers: {
@@ -19,28 +18,20 @@ const Login = () => {
         body: JSON.stringify({ email, password }),
       });
 
-      // Parsing the response
       const data = await response.json();
 
-      // Check if login is successful
-      if (response.ok) {
-        const user = data.user; // Assuming user info is in the response
+      if (response.ok && data.token && data.user) {
         localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("token", data.token); // Store the token
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
 
-        // Emit custom event for login success
         window.dispatchEvent(new CustomEvent("loginSuccess"));
-
-        // Redirect to homepage or dashboard
         navigate("/");
       } else {
-        // If login fails, show error message
-        setErrorMessage(data.message || "Invalid credentials, please try again.");
+        setErrorMessage(data.message || "Invalid credentials. Please try again.");
       }
     } catch (error) {
-      // Handle network or other errors
-      setErrorMessage("There was an error logging in. Please try again later.");
+      setErrorMessage("Error logging in. Please try again later.");
       console.error(error);
     }
   };
@@ -53,7 +44,6 @@ const Login = () => {
       >
         <h2 className="mb-6 text-2xl font-semibold text-center">Login</h2>
 
-        {/* Display error message if any */}
         {errorMessage && (
           <div className="mb-4 text-sm text-red-500">{errorMessage}</div>
         )}

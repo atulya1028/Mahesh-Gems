@@ -19,7 +19,7 @@ const SignUp = () => {
     }
 
     try {
-      const res = await fetch("https://mahesh-gems-api.vercel.app/api/auth/signup", {
+      const res = await fetch("https://mahesh-gems-api.vercel.app/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
