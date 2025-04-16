@@ -13,8 +13,9 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFilter, setShowFilter] = useState(false);
-
+  
   const filterRef = useRef();
+    
 
   useEffect(() => {
     fetch("http://localhost:3000/api/jewelry")
@@ -224,6 +225,7 @@ const Home = () => {
           </div>
         )}
       </div>
+      {/* <div>Width ---- {window.innerWidth}</div> */}
     </div>
   );
 };

@@ -14,6 +14,8 @@ const Jewelry = () => {
   const [showFilter, setShowFilter] = useState(false);
   const filterRef = useRef(null);
 
+
+
   useEffect(() => {
     fetch("http://localhost:3000/api/jewelry")
       .then((res) => {
@@ -37,6 +39,7 @@ const Jewelry = () => {
         setError("Failed to load jewelry.");
         setLoading(false);
       });
+   
   }, []);
 
   useEffect(() => {

@@ -85,13 +85,14 @@ const Layout = () => {
                 </div>
               )}
 
+              {/* Navigation Links */}
               {["/", "/jewelry", "/about", "/contact", "/location"].map((path, idx) => {
                 const names = ["Home", "Jewelry", "About Us", "Contact Us", "Location"];
                 return (
                   <li key={path} className="border-b md:border-none">
                     <Link
                       to={path}
-                      className="block px-6 py-3 text-base text-gray-700 hover:bg-[rgb(212,166,75)] md:p-2 md:text-lg hover:rounded-md hover:text-white transition-all duration-200"
+                      className="block px-6 py-3 text-base text-gray-700 hover:bg-[rgb(212,166,75)] md:p-2 md:text-lg hover:rounded-md hover:text-white transition-all duration-200 md:whitespace-nowrap"
                       onClick={() => setIsOpen(false)}
                     >
                       {names[idx]}
