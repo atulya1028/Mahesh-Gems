@@ -20,6 +20,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="jewelry" element={<Jewelry />} />
@@ -32,7 +33,6 @@ const App = () => {
           <Route path="jewelry/:id" element={<JewelryDetail />} />
           <Route path="*" element={<NoPage />} />
         </Route>
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   );
