@@ -14,6 +14,7 @@ import NoPage from './NoPage';
 import JewelryDetail from './JewelryDetail'; 
 import '@fontsource/montserrat'; 
 import ResetPassword from './ResetPassword';
+import Wishlist from './Wishlist';
 
 
 const App = () => {
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="jewelry/:id" element={<JewelryDetail />} />
           <Route path="*" element={<NoPage />} />
         </Route>
+        <Route path='wishlist' element={<Wishlist />} />
       </Routes>
     </BrowserRouter>
   );
