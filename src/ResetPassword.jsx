@@ -26,6 +26,13 @@ const ResetPassword = () => {
       return;
     }
 
+    const isStrongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!isStrongPassword.test(newPassword)) {
+      setError("❌ Password must be at least 8 characters long, and include an uppercase letter, a number, and a special character.");
+      setMessage("");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -40,10 +47,13 @@ const ResetPassword = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        if (data.message) {
-          throw new Error(data.message);  // More specific error message
+        if (data.message === "Invalid or expired token") {
+          setError("❌ Invalid or expired token.");
+        } else {
+          setError(data.message || "❌ Something went wrong. Please try again.");
         }
-        throw new Error("Something went wrong. Please try again.");
+        setMessage("");
+        return;
       }
 
       setMessage(data.message);
@@ -67,7 +77,12 @@ const ResetPassword = () => {
         <h2 className="mb-6 text-2xl font-bold text-center">🔐 Reset Password</h2>
 
         {message && <p className="mb-4 text-center text-green-600">{message}</p>}
-        {error && <p className="mb-4 text-center text-red-600">{error}</p>}
+        {error && (
+          <div className="flex items-center justify-between p-3 mb-4 text-red-800 bg-red-200 rounded">
+            <span>{error}</span>
+            <button onClick={() => setError("")} className="font-bold text-red-600">✖</button>
+          </div>
+        )}
 
         <form onSubmit={handleResetPassword}>
           <div className="mb-4">
