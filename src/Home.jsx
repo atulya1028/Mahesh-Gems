@@ -99,7 +99,7 @@ const Home = () => {
       )}
 
       {/* Filter/Search Bar */}
-      <section className="px-4 py-4 bg-white shadow-sm">
+      <section className="px-4 py-4 bg-white shadow-sm z-60">
         <div className="flex flex-wrap items-center justify-between gap-4 mx-auto max-w-7xl">
           {/* Search Bar */}
           <div className="flex justify-center flex-1">

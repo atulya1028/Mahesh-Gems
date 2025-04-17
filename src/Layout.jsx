@@ -105,7 +105,7 @@ const Layout = () => {
                 className="flex items-center p-2 space-x-1 text-sm font-medium text-gray-700 transition-colors rounded-md md:text-base hover:bg-gray-100"
               >
                 <User size={20} className="text-gray-600" />
-                <span>{isLoggedIn && user?.name ? `Hi, ${user.name}` : "My Account"}</span>
+                <span>{isLoggedIn && user?.name ? `Hi, ${user.name.split(" ")[0]}` : "My Account"}</span>
                 <svg
                   className="w-4 h-4 ml-1"
                   fill="none"
@@ -127,7 +127,7 @@ const Layout = () => {
                   {isLoggedIn ? (
                     <div className="py-2">
                       <p className="px-4 py-2 text-sm text-gray-600 border-b border-gray-200">
-                        Welcome, <span className="font-semibold">{user?.name}</span>
+                        Welcome, <span className="font-semibold">{user?.name.split(" ")[0]}</span>
                       </p>
                       <Link
                         to="/account"
@@ -182,7 +182,7 @@ const Layout = () => {
         </div>
       </nav>
 
-      <div className="pt-[80px]">
+      <div className="pt-[150px]">
         <Outlet />
       </div>
       <Footer />
