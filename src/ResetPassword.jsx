@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 const ResetPassword = () => {
-  const { token } = useParams(); // token from URL
+  const { token } = useParams();
   const navigate = useNavigate();
 
   const [newPassword, setNewPassword] = useState("");
@@ -36,22 +36,18 @@ const ResetPassword = () => {
     try {
       setLoading(true);
 
-      const res = await fetch("https://mahesh-gems-api.vercel.app/api/auth/reset-password", {
+      const res = await fetch(`https://mahesh-gems-api.vercel.app/api/auth/reset-password/${token}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ token, newPassword }),
+        body: JSON.stringify({ newPassword }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        if (data.message === "Invalid or expired token") {
-          setError("❌ Invalid or expired token.");
-        } else {
-          setError(data.message || "❌ Something went wrong. Please try again.");
-        }
+        setError(data.message || "❌ Something went wrong.");
         setMessage("");
         return;
       }
@@ -61,10 +57,9 @@ const ResetPassword = () => {
       setNewPassword("");
       setConfirmPassword("");
 
-      // Redirect to login page after a short delay
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setError(err.message);
+      setError("❌ Network error. Please try again.");
       setMessage("");
     } finally {
       setLoading(false);
