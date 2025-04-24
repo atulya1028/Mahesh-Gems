@@ -1,67 +1,43 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Added useNavigate
 import Lottie from "lottie-react";
 import loader from "./assets/loading.json";
 
 const JewelryDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Initialize useNavigate
   const [jewelry, setJewelry] = useState(null);
   const [error, setError] = useState(null);
-
-  // Backend API base URL (use deployed backend or local)
-  const API_URL = "https://mahesh-gems-api.vercel.app/api"; // Change to "http://localhost:5000/api" for local testing
-
-  // Get JWT token from localStorage
-  const getToken = () => localStorage.getItem("token");
 
   useEffect(() => {
     fetch(`https://mahesh-gems-api.vercel.app/api/jewelry/${id}`)
       .then((res) => {
         if (!res.ok) {
-          throw new Error(`Jewelry not found (Status: ${res.status})`);
+          throw new Error("Jewelry not found");
         }
         return res.json();
       })
       .then((data) => setJewelry(data))
       .catch((err) => {
-        console.error("Jewelry fetch error:", err);
-        setError("Unable to load jewelry details. Please try again.");
+        console.error(err);
+        setError("Unable to load jewelry details.");
       });
   }, [id]);
 
   // Function to handle adding to wishlist and navigating
-  const handleAddToWishlist = async () => {
-    if (!jewelry) return;
-
-    try {
-      const token = getToken();
-      if (!token) {
-        alert("Please log in to add items to your wishlist.");
-        navigate("/login");
-        return;
+  const handleAddToWishlist = () => {
+    if (jewelry) {
+      // Get existing wishlist from localStorage or initialize empty array
+      const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+      // Check if item already exists to avoid duplicates (optional)
+      if (!wishlist.some((item) => item.id === jewelry.id)) {
+        wishlist.push(jewelry);
+        localStorage.setItem("wishlist", JSON.stringify(wishlist));
+        alert("Added to wishlist!");
+      } else {
+        alert("Item already in wishlist!");
       }
-
-      const response = await fetch(`${API_URL}/wishlist/add`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ jewelryId: id }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Failed to add item to wishlist (Status: ${response.status})`);
-      }
-
-      const data = await response.json();
-      alert(`${jewelry.title} added to wishlist! (Wishlist count: ${data.wishlistCount})`);
-      navigate("/wishlist");
-    } catch (err) {
-      console.error("Wishlist add error:", err);
-      alert(err.message || "Failed to add item to wishlist. Please try again.");
+      navigate("/wishlist"); // Navigate to wishlist page
     }
   };
 
@@ -127,7 +103,7 @@ const JewelryDetail = () => {
               </button>
               <span
                 className="flex items-center justify-center w-full px-4 py-3 text-lg font-medium cursor-pointer text-rose-400 hover:text-rose-500"
-                onClick={handleAddToWishlist}
+                onClick={handleAddToWishlist} // Updated to use handler
                 role="button"
                 tabIndex="0"
                 aria-label="Add to Wishlist"
