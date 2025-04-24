@@ -19,14 +19,14 @@ const JewelryDetail = () => {
     fetch(`https://mahesh-gems-api.vercel.app/api/jewelry/${id}`)
       .then((res) => {
         if (!res.ok) {
-          throw new Error("Jewelry not found");
+          throw new Error(`Jewelry not found (Status: ${res.status})`);
         }
         return res.json();
       })
       .then((data) => setJewelry(data))
       .catch((err) => {
-        console.error(err);
-        setError("Unable to load jewelry details.");
+        console.error("Jewelry fetch error:", err);
+        setError("Unable to load jewelry details. Please try again.");
       });
   }, [id]);
 
@@ -53,14 +53,15 @@ const JewelryDetail = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to add item to wishlist.");
+        throw new Error(errorData.message || `Failed to add item to wishlist (Status: ${response.status})`);
       }
 
       const data = await response.json();
       alert(`${jewelry.title} added to wishlist! (Wishlist count: ${data.wishlistCount})`);
       navigate("/wishlist");
     } catch (err) {
-      alert(err.message || "Failed to add item to wishlist.");
+      console.error("Wishlist add error:", err);
+      alert(err.message || "Failed to add item to wishlist. Please try again.");
     }
   };
 
