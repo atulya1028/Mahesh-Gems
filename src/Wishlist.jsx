@@ -8,7 +8,7 @@ const Wishlist = () => {
   const [error, setError] = useState(null);
 
   // Backend API base URL (adjust as needed)
-  const API_URL = "http://localhost:3000/api";
+  const API_URL = "https://mahesh-gems-api.vercel.app/api";
 
   // Get JWT token from localStorage
   const getToken = () => localStorage.getItem("token");
