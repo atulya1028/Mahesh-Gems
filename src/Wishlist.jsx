@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Lottie from "lottie-react";
 import loader from "./assets/loading.json";
 import emptyBox from "./assets/empty_box.json";
@@ -14,9 +16,10 @@ const Wishlist = () => {
   useEffect(() => {
     const fetchWishlist = async () => {
       const token = localStorage.getItem("token");
-      console.log("Token:", token); // Debug: Log token
+      console.log("Wishlist: Token:", token); // Debug: Log token
       if (!token) {
         setError("Please log in to view your wishlist.");
+        toast.error("Please log in to view your wishlist.");
         setLoading(false);
         setTimeout(() => navigate("/login"), 2000);
         return;
@@ -29,13 +32,14 @@ const Wishlist = () => {
           },
         });
 
-        console.log("Response Status:", response.status); // Debug: Log status
+        console.log("Wishlist: Response Status:", response.status); // Debug: Log status
         const data = await response.json();
-        console.log("Wishlist Data:", data); // Debug: Log response
+        console.log("Wishlist: Response Data:", JSON.stringify(data, null, 2)); // Debug: Log full response
 
         if (!response.ok) {
           if (response.status === 401) {
             setError("Session expired. Please log in again.");
+            toast.error("Session expired. Please log in again.");
             localStorage.removeItem("token");
             localStorage.removeItem("isLoggedIn");
             localStorage.removeItem("user");
@@ -47,11 +51,14 @@ const Wishlist = () => {
         }
 
         // Ensure wishlistItems is an array
-        setWishlistItems(Array.isArray(data.wishlistItems) ? data.wishlistItems : []);
+        const items = Array.isArray(data.wishlistItems) ? data.wishlistItems : [];
+        console.log("Wishlist: Processed Items:", items); // Debug: Log processed items
+        setWishlistItems(items);
         setLoading(false);
       } catch (err) {
-        console.error("Fetch Error:", err); // Debug: Log error
+        console.error("Wishlist: Fetch Error:", err); // Debug: Log error
         setError(err.message || "Unable to load wishlist. Please try again.");
+        toast.error(err.message || "Unable to load wishlist.");
         setLoading(false);
       }
     };
@@ -64,6 +71,7 @@ const Wishlist = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       setError("Please log in to modify your wishlist.");
+      toast.error("Please log in to modify your wishlist.");
       setTimeout(() => navigate("/login"), 2000);
       return;
     }
@@ -80,12 +88,14 @@ const Wishlist = () => {
         const data = await response.json();
         if (response.status === 401) {
           setError("Session expired. Please log in again.");
+          toast.error("Session expired. Please log in again.");
           localStorage.removeItem("token");
           localStorage.removeItem("isLoggedIn");
           localStorage.removeItem("user");
           setTimeout(() => navigate("/login"), 2000);
         } else if (response.status === 404) {
           setError(data.message || "Wishlist item not found.");
+          toast.error(data.message || "Wishlist item not found.");
         } else {
           throw new Error(data.message || "Failed to remove item");
         }
@@ -94,10 +104,11 @@ const Wishlist = () => {
 
       const data = await response.json();
       setWishlistItems(wishlistItems.filter((item) => item._id !== id));
-      alert(data.message || "Item removed from wishlist!");
-      setError(null); // Clear errors
+      toast.success(data.message || "Item removed from wishlist!");
+      setError(null);
     } catch (err) {
       setError(err.message || "Unable to remove item. Please try again.");
+      toast.error(err.message || "Unable to remove item.");
     }
   };
 
@@ -108,6 +119,7 @@ const Wishlist = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       setError("Please log in to modify your wishlist.");
+      toast.error("Please log in to modify your wishlist.");
       setTimeout(() => navigate("/login"), 2000);
       return;
     }
@@ -124,6 +136,7 @@ const Wishlist = () => {
         const data = await response.json();
         if (response.status === 401) {
           setError("Session expired. Please log in again.");
+          toast.error("Session expired. Please log in again.");
           localStorage.removeItem("token");
           localStorage.removeItem("isLoggedIn");
           localStorage.removeItem("user");
@@ -136,16 +149,17 @@ const Wishlist = () => {
 
       const data = await response.json();
       setWishlistItems([]);
-      alert(data.message || "Wishlist cleared successfully!");
+      toast.success(data.message || "Wishlist cleared successfully!");
       setError(null);
     } catch (err) {
       setError(err.message || "Unable to clear wishlist. Please try again.");
+      toast.error(err.message || "Unable to clear wishlist.");
     }
   };
 
   // Function to simulate adding to cart
   const handleAddToCart = (item) => {
-    alert(`${item.jewelry?.title || "Item"} added to cart!`);
+    toast.success(`${item.jewelry?.title || "Item"} added to cart!`);
   };
 
   if (loading) {
@@ -160,7 +174,7 @@ const Wishlist = () => {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen text-xl text-red-500">
+      <div className="flex flex-col items-center justify-center h-screen text-xl text-red-600 font-montserrat">
         <p>{error}</p>
         <button
           className="mt-4 text-sm text-blue-600 hover:underline"
@@ -174,10 +188,11 @@ const Wishlist = () => {
 
   return (
     <div className="container px-4 mx-auto mt-6 font-montserrat">
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between pb-4 mb-6 border-b">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Your Wishlist</h1>
+          <h1 className="text-3xl font-bold text-[#0F1111]">Your Wishlist</h1>
           <p className="text-sm text-gray-600">
             {wishlistItems.length} item{wishlistItems.length !== 1 ? "s" : ""}
           </p>
@@ -185,7 +200,7 @@ const Wishlist = () => {
         <div className="flex space-x-4">
           {wishlistItems.length > 0 && (
             <button
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-[#EDEDED] rounded-md hover:bg-gray-300"
               onClick={handleClearWishlist}
             >
               Clear Wishlist
@@ -193,9 +208,9 @@ const Wishlist = () => {
           )}
           <button
             className="text-sm text-blue-600 hover:underline"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/jewelry")}
           >
-            Back to Shopping
+            Continue Shopping
           </button>
         </div>
       </div>
@@ -203,19 +218,20 @@ const Wishlist = () => {
       {/* Wishlist Content */}
       {wishlistItems.length === 0 ? (
         <div className="flex flex-col items-center p-6 text-center bg-white border rounded-lg shadow-sm">
-          <div className="w-50 sm:w-100">
+          <div className="w-32 sm:w-48">
             <Lottie animationData={emptyBox} loop autoPlay />
           </div>
-          <p className="text-lg text-gray-600">Your wishlist is empty.</p>
+          <h2 className="text-xl font-semibold text-[#0F1111] mt-4">Your Wishlist is Empty</h2>
+          <p className="mt-2 text-gray-600">Add items you want to shop for later.</p>
           <button
-            className="mt-4 text-sm text-blue-600 hover:underline"
+            className="mt-4 px-6 py-2 text-sm font-medium text-[#0F1111] bg-[#F7CA00] rounded-md hover:bg-[#e0b300]"
             onClick={() => navigate("/jewelry")}
           >
-            Continue Shopping
+            Browse Jewelry
           </button>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
           {wishlistItems.map((item) => (
             <div
               key={item._id}
@@ -225,30 +241,35 @@ const Wishlist = () => {
               <img
                 src={item.jewelry?.image || "https://via.placeholder.com/150"}
                 alt={item.jewelry?.title || "Item"}
-                className="object-contain w-24 h-24 mr-4 rounded"
+                className="object-contain w-32 h-32 mr-4 rounded"
               />
               {/* Item Details */}
               <div className="flex-1">
                 <h2
-                  className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600"
+                  className="text-lg font-semibold text-[#0F1111] cursor-pointer hover:text-blue-600"
                   onClick={() => navigate(`/jewelry/${item.jewelry?._id || ""}`)}
                 >
                   {item.jewelry?.title || "Unknown Item"}
                 </h2>
-                <p className="text-sm text-gray-500">In Stock</p>
-                <p className="mt-1 text-lg font-bold text-gray-900">
+                <p className="text-sm text-green-600">
+                  {item.jewelry?.inStock ? "In Stock" : "Out of Stock"}
+                </p>
+                <p className="mt-1 text-xl font-bold text-[#0F1111]">
                   ₹{item.jewelry?.price || "N/A"}
                 </p>
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  {item.jewelry?.description || "No description available"}
+                </p>
                 {/* Actions */}
-                <div className="flex mt-2 space-x-2">
+                <div className="flex mt-3 space-x-3">
                   <button
-                    className="px-4 py-1.5 text-sm font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
+                    className="px-4 py-2 text-sm font-medium text-[#0F1111] bg-[#F7CA00] rounded-md hover:bg-[#e0b300]"
                     onClick={() => handleAddToCart(item)}
                   >
                     Add to Cart
                   </button>
                   <button
-                    className="px-4 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-[#EDEDED] rounded-md hover:bg-gray-300"
                     onClick={() => handleRemove(item._id)}
                   >
                     Delete
