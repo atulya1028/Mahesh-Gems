@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // Added useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import loader from "./assets/loading.json";
 
 const JewelryDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
   const [jewelry, setJewelry] = useState(null);
   const [error, setError] = useState(null);
+  const [wishlistError, setWishlistError] = useState(null);
 
+  // Fetch jewelry details
   useEffect(() => {
     fetch(`https://mahesh-gems-api.vercel.app/api/jewelry/${id}`)
       .then((res) => {
@@ -24,20 +26,50 @@ const JewelryDetail = () => {
       });
   }, [id]);
 
-  // Function to handle adding to wishlist and navigating
-  const handleAddToWishlist = () => {
-    if (jewelry) {
-      // Get existing wishlist from localStorage or initialize empty array
-      const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
-      // Check if item already exists to avoid duplicates (optional)
-      if (!wishlist.some((item) => item.id === jewelry.id)) {
-        wishlist.push(jewelry);
-        localStorage.setItem("wishlist", JSON.stringify(wishlist));
-        alert("Added to wishlist!");
-      } else {
-        alert("Item already in wishlist!");
+  // Function to handle adding to wishlist
+  const handleAddToWishlist = async () => {
+    if (!jewelry) return;
+
+    // Get token from localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setWishlistError("Please log in to add items to your wishlist.");
+      // Optionally redirect to login page
+      setTimeout(() => navigate("/login"), 2000);
+      return;
+    }
+
+    try {
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/wishlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jewelryId: id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          setWishlistError("Session expired. Please log in again.");
+          localStorage.removeItem("token");
+          setTimeout(() => navigate("/login"), 2000);
+        } else if (response.status === 400) {
+          setWishlistError(data.message || "Item already in wishlist.");
+        } else {
+          setWishlistError("Failed to add to wishlist. Please try again.");
+        }
+        return;
       }
-      navigate("/wishlist"); // Navigate to wishlist page
+
+      // Success: Show confirmation and navigate to wishlist
+      alert(data.message || "Added to wishlist!");
+      navigate("/wishlist");
+    } catch (err) {
+      console.error("Wishlist error:", err);
+      setWishlistError("Server error. Please try again later.");
     }
   };
 
@@ -57,6 +89,10 @@ const JewelryDetail = () => {
 
   return (
     <div className="container px-4 mx-auto mt-10 font-montserrat">
+      {/* Display wishlist error if any */}
+      {wishlistError && (
+        <div className="mb-4 text-center text-red-500">{wishlistError}</div>
+      )}
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {/* Image Section */}
         <div className="flex justify-center md:col-span-1">
@@ -103,7 +139,7 @@ const JewelryDetail = () => {
               </button>
               <span
                 className="flex items-center justify-center w-full px-4 py-3 text-lg font-medium cursor-pointer text-rose-400 hover:text-rose-500"
-                onClick={handleAddToWishlist} // Updated to use handler
+                onClick={handleAddToWishlist}
                 role="button"
                 tabIndex="0"
                 aria-label="Add to Wishlist"
