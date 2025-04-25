@@ -38,11 +38,21 @@ const SignUp = () => {
     }
   };
 
+  // Optional: Explicitly handle Enter key on inputs (uncomment if needed)
+  /*
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === "Return") {
+      handleSignup(e);
+    }
+  };
+  */
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 font-montserrat">
       <form
         onSubmit={handleSignup}
         className="w-full max-w-md p-8 bg-white rounded shadow"
+        aria-label="Sign up form"
       >
         <h2 className="mb-6 text-2xl font-bold text-center">Signup</h2>
         {msg && <p className="mb-4 text-center text-red-600">{msg}</p>}
@@ -54,6 +64,8 @@ const SignUp = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
+          aria-label="Full name"
+          // onKeyDown={handleKeyDown} // Uncomment if using explicit keydown handler
         />
 
         <input
@@ -63,6 +75,8 @@ const SignUp = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          aria-label="Email address"
+          // onKeyDown={handleKeyDown} // Uncomment if using explicit keydown handler
         />
 
         <input
@@ -72,6 +86,8 @@ const SignUp = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          aria-label="Password"
+          // onKeyDown={handleKeyDown} // Uncomment if using explicit keydown handler
         />
 
         <input
@@ -81,11 +97,14 @@ const SignUp = () => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
+          aria-label="Confirm password"
+          // onKeyDown={handleKeyDown} // Uncomment if using explicit keydown handler
         />
 
         <button
           type="submit"
-          className="w-full p-2 font-semibold text-white bg-green-600 rounded hover:bg-green-700"
+          className="w-full p-2 font-semibold text-white bg-green-600 rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+          aria-label="Submit signup"
         >
           Signup
         </button>
