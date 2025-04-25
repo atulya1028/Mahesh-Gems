@@ -61,6 +61,31 @@ const Wishlist = () => {
     }
   };
 
+  const handleAddToCart = async (jewelryId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jewelryId, quantity: 1 }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Added to cart!");
+        navigate("/cart");
+      } else {
+        alert(data.message || "Failed to add to cart");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error adding to cart");
+    }
+  };
+
   const handleClearWishlist = async () => {
     if (!window.confirm("Are you sure you want to clear your wishlist?")) return;
 
@@ -84,7 +109,6 @@ const Wishlist = () => {
       alert("Error clearing wishlist");
     }
   };
-
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
@@ -160,6 +184,7 @@ const Wishlist = () => {
                 <div className="flex mt-2 space-x-2">
                   <button
                     className="px-4 py-1.5 text-sm font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
+                    onClick={() => handleAddToCart(item.jewelryId._id || item.jewelryId)}
                   >
                     Add to Cart
                   </button>

@@ -1,6 +1,6 @@
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, ShoppingCart } from "lucide-react";
 import logo from "./assets/images/mg-logo.png";
 import Footer from "./Footer";
 
@@ -9,6 +9,7 @@ const Layout = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const dropdownRef = useRef();
   const navigate = useNavigate();
 
@@ -17,6 +18,7 @@ const Layout = () => {
     setIsLoggedIn(false);
     setUser(null);
     setDropdownOpen(false);
+    setCartCount(0);
     navigate("/");
   };
 
@@ -27,10 +29,34 @@ const Layout = () => {
     setUser(userData);
   };
 
+  // Fetch cart item count
+  const fetchCartCount = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        const count = data.items ? data.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+        setCartCount(count);
+      }
+    } catch (err) {
+      console.error("Error fetching cart count:", err);
+    }
+  };
+
   useEffect(() => {
     updateLoginState();
+    fetchCartCount();
     const handleLoginEvent = () => {
       updateLoginState();
+      fetchCartCount();
     };
     window.addEventListener("loginSuccess", handleLoginEvent);
     return () => {
@@ -82,8 +108,8 @@ const Layout = () => {
                 </div>
               )}
 
-              {["/", "/jewelry", "/about", "/contact", "/location"].map((path, idx) => {
-                const names = ["Home", "Jewelry", "About Us", "Contact Us", "Location"];
+              {["/", "/jewelry", "/about", "/contact", "/location", "/cart"].map((path, idx) => {
+                const names = ["Home", "Jewelry", "About Us", "Contact Us", "Location", "Cart"];
                 return (
                   <li key={path} className="border-b md:border-none">
                     <Link
@@ -97,6 +123,16 @@ const Layout = () => {
                 );
               })}
             </ul>
+
+            {/* Cart Icon with Badge */}
+            <Link to="/cart" className="relative">
+              <ShoppingCart size={24} className="text-gray-600 hover:text-gray-900" />
+              {cartCount > 0 && (
+                <span className="absolute flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-yellow-500 rounded-full -top-2 -right-2">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
 
             {/* User Dropdown */}
             <div className="relative" ref={dropdownRef}>
@@ -138,7 +174,7 @@ const Layout = () => {
                       </Link>
                       <Link
                         to="/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:b g-gray-100"
                         onClick={() => setDropdownOpen(false)}
                       >
                         My Orders
@@ -149,6 +185,13 @@ const Layout = () => {
                         onClick={() => setDropdownOpen(false)}
                       >
                         Wishlist
+                      </Link>
+                      <Link
+                        to="/cart"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        Cart
                       </Link>
                       <button
                         onClick={handleLogout}
@@ -172,6 +215,13 @@ const Layout = () => {
                         onClick={() => setDropdownOpen(false)}
                       >
                         Sign Up
+                      </Link>
+                      <Link
+                        to="/cart"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        Cart
                       </Link>
                     </div>
                   )}
