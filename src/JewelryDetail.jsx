@@ -24,11 +24,44 @@ const JewelryDetail = () => {
       });
   }, [id]);
 
+  const handleAddToCart = async () => {
+    if (!jewelry) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to add to cart");
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jewelryId: jewelry._id, quantity: 1 }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Added to cart!");
+        navigate("/cart");
+      } else {
+        alert(data.message || "Failed to add to cart");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error adding to cart");
+    }
+  };
+
   const handleAddToWishlist = async () => {
     if (!jewelry) return;
 
     try {
-      const token = localStorage.getItem("token"); // Assuming token is stored in localStorage
+      const token = localStorage.getItem("token");
       if (!token) {
         alert("Please log in to add to wishlist");
         navigate("/login");
@@ -102,7 +135,7 @@ const JewelryDetail = () => {
             <div className="space-y-3">
               <button
                 className="w-full px-6 py-3 text-lg font-medium text-white transition rounded-md bg-[rgb(232,217,202)] hover:bg-amber-600"
-                onClick={() => alert("Added to cart!")}
+                onClick={handleAddToCart}
               >
                 Add to Cart
               </button>
