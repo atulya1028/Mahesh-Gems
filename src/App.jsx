@@ -13,7 +13,6 @@ import NoPage from "./NoPage";
 import JewelryDetail from "./JewelryDetail";
 import ResetPassword from "./ResetPassword";
 import Wishlist from "./Wishlist";
-import Cart from "./Cart"; // Add this import
 import "@fontsource/montserrat";
 
 const App = () => {
@@ -31,7 +30,6 @@ const App = () => {
           <Route path="signup" element={<SignUp />} />
           <Route path="jewelry/:id" element={<JewelryDetail />} />
           <Route path="wishlist" element={<Wishlist />} />
-          <Route path="cart" element={<Cart />} /> {/* Add this route */}
           <Route path="*" element={<NoPage />} />
         </Route>
         <Route path="/reset-password/:token" element={<ResetPassword />} />

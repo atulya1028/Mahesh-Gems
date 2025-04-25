@@ -85,9 +85,6 @@ const Wishlist = () => {
     }
   };
 
-  const handleAddToCart = (item) => {
-    alert(`${item.title} added to cart!`);
-  };
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
@@ -163,7 +160,6 @@ const Wishlist = () => {
                 <div className="flex mt-2 space-x-2">
                   <button
                     className="px-4 py-1.5 text-sm font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
-                    onClick={() => handleAddToCart(item)}
                   >
                     Add to Cart
                   </button>
