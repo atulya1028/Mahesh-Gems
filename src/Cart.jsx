@@ -46,8 +46,9 @@ const Cart = () => {
   }, []);
 
   const handleQuantityChange = async (jewelryId, delta) => {
-    console.log("Quantity change triggered:", { jewelryId, delta });
+    console.log("handleQuantityChange start:", { jewelryId, delta });
     try {
+      // Validate token
       const token = localStorage.getItem("token");
       if (!token) {
         console.log("No token found");
@@ -55,24 +56,32 @@ const Cart = () => {
         navigate("/login");
         return;
       }
+      console.log("Token validated:", token.slice(0, 10) + "...");
 
-      const item = cart.find((item) => item.jewelryId.toString() === jewelryId);
+      // Validate item
+      const item = cart.find((item) => item.jewelryId.toString() === jewelryId.toString());
       if (!item) {
         console.error("Item not found in cart:", jewelryId);
         alert("Item not found in cart");
         return;
       }
+      console.log("Item found:", { jewelryId, title: item.title, currentQuantity: item.quantity });
 
+      // Calculate new quantity
       const newQuantity = item.quantity + delta;
       if (newQuantity < 1) {
         console.log("Quantity cannot be less than 1");
         return;
       }
+      console.log("New quantity calculated:", newQuantity);
 
+      // Optimistic update
       setItemLoading((prev) => ({ ...prev, [jewelryId]: true }));
       const previousCart = JSON.parse(JSON.stringify(cart)); // Deep copy
-      const updatedCart = cart.map((item) =>
-        item.jewelryId.toString() === jewelryId ? { ...item, quantity: newQuantity } : item
+      const updatedCart = cart.map((cartItem) =>
+        cartItem.jewelryId.toString() === jewelryId.toString()
+          ? { ...cartItem, quantity: newQuantity }
+          : cartItem
       );
       setCart(updatedCart);
       const newSubtotal = updatedCart.reduce(
@@ -80,9 +89,13 @@ const Cart = () => {
         0
       );
       setSubtotal(newSubtotal);
-      console.log("Quantity updated locally:", { jewelryId, newQuantity, newSubtotal, updatedCart });
+      console.log("Optimistic update applied:", { newQuantity, newSubtotal, updatedCartLength: updatedCart.length });
 
-      console.log("Sending PUT request:", { url: `https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, quantity: newQuantity });
+      // API call
+      console.log("Sending PUT request:", {
+        url: `https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`,
+        body: { quantity: newQuantity },
+      });
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, {
         method: "PUT",
         headers: {
@@ -93,8 +106,10 @@ const Cart = () => {
       });
 
       const data = await response.json();
-      console.log("Update quantity response:", { status: response.status, data });
+      console.log("PUT response:", { status: response.status, data });
+
       if (response.ok) {
+        console.log("Update successful, syncing with backend");
         setCart(data.items || updatedCart);
         setSubtotal(data.subtotal || newSubtotal);
       } else if (response.status === 401) {
@@ -103,12 +118,19 @@ const Cart = () => {
         localStorage.removeItem("token");
         navigate("/login");
       } else if (response.status === 400 && data.message.includes("items in stock")) {
-        console.log("Stock limit reached:", data.message);
+        console.log("Stock limit error:", data.message);
         setCart(previousCart);
         setSubtotal(
           previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
         );
         alert(data.message);
+      } else if (response.status === 404) {
+        console.log("Item or cart not found:", data.message);
+        setCart(previousCart);
+        setSubtotal(
+          previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
+        );
+        alert(data.message || "Item not found in cart");
       } else {
         console.log("Update failed:", data.message);
         setCart(previousCart);
@@ -118,7 +140,7 @@ const Cart = () => {
         alert(data.message || "Failed to update quantity");
       }
     } catch (err) {
-      console.error("Update quantity error:", err);
+      console.error("handleQuantityChange error:", err);
       setCart(previousCart);
       setSubtotal(
         previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
@@ -126,6 +148,7 @@ const Cart = () => {
       alert("Error updating quantity: " + err.message);
     } finally {
       setItemLoading((prev) => ({ ...prev, [jewelryId]: false }));
+      console.log("handleQuantityChange complete");
     }
   };
 
@@ -148,7 +171,7 @@ const Cart = () => {
       }
 
       setItemLoading((prev) => ({ ...prev, [jewelryId]: true }));
-      const previousCart = JSON.parse(JSON.stringify(cart)); // Deep copy
+      const previousCart = JSON.parse(JSON.stringify(cart));
       const updatedCart = cart.filter((item) => item.jewelryId.toString() !== jewelryId);
       setCart(updatedCart);
       const newSubtotal = updatedCart.reduce(
