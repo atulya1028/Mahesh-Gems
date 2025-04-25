@@ -59,13 +59,14 @@ const Cart = () => {
       console.log("Token validated:", token.slice(0, 10) + "...");
 
       // Validate item
-      const item = cart.find((item) => item.jewelryId.toString() === jewelryId.toString());
+      console.log("Cart state:", cart);
+      const item = cart.find((item) => item.jewelryId._id.toString() === jewelryId.toString());
       if (!item) {
         console.error("Item not found in cart:", jewelryId);
         alert("Item not found in cart");
         return;
       }
-      console.log("Item found:", { jewelryId, title: item.title, currentQuantity: item.quantity });
+      console.log("Item found:", { jewelryId: item.jewelryId._id, title: item.title, currentQuantity: item.quantity });
 
       // Calculate new quantity
       const newQuantity = item.quantity + delta;
@@ -79,7 +80,7 @@ const Cart = () => {
       setItemLoading((prev) => ({ ...prev, [jewelryId]: true }));
       const previousCart = JSON.parse(JSON.stringify(cart)); // Deep copy
       const updatedCart = cart.map((cartItem) =>
-        cartItem.jewelryId.toString() === jewelryId.toString()
+        cartItem.jewelryId._id.toString() === jewelryId.toString()
           ? { ...cartItem, quantity: newQuantity }
           : cartItem
       );
@@ -89,7 +90,7 @@ const Cart = () => {
         0
       );
       setSubtotal(newSubtotal);
-      console.log("Optimistic update applied:", { newQuantity, newSubtotal, updatedCartLength: updatedCart.length });
+      console.log("Optimistic update applied:", { newQuantity, newSubtotal, updatedCart });
 
       // API call
       console.log("Sending PUT request:", {
@@ -109,7 +110,7 @@ const Cart = () => {
       console.log("PUT response:", { status: response.status, data });
 
       if (response.ok) {
-        console.log("Update successful, syncing with backend");
+        console.log("Update successful, syncing with backend:", data.items);
         setCart(data.items || updatedCart);
         setSubtotal(data.subtotal || newSubtotal);
       } else if (response.status === 401) {
@@ -153,7 +154,7 @@ const Cart = () => {
   };
 
   const handleRemove = async (jewelryId) => {
-    console.log("Remove triggered:", { jewelryId });
+    console.log("handleRemove start:", { jewelryId });
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -163,16 +164,18 @@ const Cart = () => {
         return;
       }
 
-      const item = cart.find((item) => item.jewelryId.toString() === jewelryId);
+      console.log("Cart state:", cart);
+      const item = cart.find((item) => item.jewelryId._id.toString() === jewelryId.toString());
       if (!item) {
         console.error("Item not found in cart:", jewelryId);
         alert("Item not found in cart");
         return;
       }
+      console.log("Item to remove:", { jewelryId: item.jewelryId._id, title: item.title });
 
       setItemLoading((prev) => ({ ...prev, [jewelryId]: true }));
       const previousCart = JSON.parse(JSON.stringify(cart));
-      const updatedCart = cart.filter((item) => item.jewelryId.toString() !== jewelryId);
+      const updatedCart = cart.filter((item) => item.jewelryId._id.toString() !== jewelryId.toString());
       setCart(updatedCart);
       const newSubtotal = updatedCart.reduce(
         (sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity,
@@ -192,6 +195,7 @@ const Cart = () => {
       const data = await response.json();
       console.log("Remove item response:", { status: response.status, data });
       if (response.ok) {
+        console.log("Remove successful, syncing with backend:", data.items);
         setCart(data.items || updatedCart);
         setSubtotal(data.subtotal || newSubtotal);
         alert("Removed from cart!");
@@ -209,7 +213,7 @@ const Cart = () => {
         alert(data.message || "Failed to remove from cart");
       }
     } catch (err) {
-      console.error("Remove item error:", err);
+      console.error("handleRemove error:", err);
       setCart(previousCart);
       setSubtotal(
         previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
@@ -217,6 +221,7 @@ const Cart = () => {
       alert("Error removing from cart: " + err.message);
     } finally {
       setItemLoading((prev) => ({ ...prev, [jewelryId]: false }));
+      console.log("handleRemove complete");
     }
   };
 
@@ -346,7 +351,7 @@ const Cart = () => {
             <div className="space-y-4">
               {cart.map((item) => (
                 <div
-                  key={item.jewelryId}
+                  key={`${item.jewelryId._id}-${item.quantity}`}
                   className="flex items-start p-4 bg-white border rounded-lg shadow-sm hover:shadow-md"
                 >
                   <img
@@ -366,28 +371,28 @@ const Cart = () => {
                       <div className="flex items-center border border-gray-300 rounded-md">
                         <button
                           className="px-2 py-1 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-                          onClick={() => handleQuantityChange(item.jewelryId, -1)}
-                          disabled={itemLoading[item.jewelryId] || item.quantity <= 1}
+                          onClick={() => handleQuantityChange(item.jewelryId._id, -1)}
+                          disabled={itemLoading[item.jewelryId._id] || item.quantity <= 1}
                         >
                           -
                         </button>
                         <span className="px-3 py-1 text-gray-900">{item.quantity}</span>
                         <button
                           className="px-2 py-1 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-                          onClick={() => handleQuantityChange(item.jewelryId, 1)}
-                          disabled={itemLoading[item.jewelryId]}
+                          onClick={() => handleQuantityChange(item.jewelryId._id, 1)}
+                          disabled={itemLoading[item.jewelryId._id]}
                         >
                           +
                         </button>
                       </div>
                       <button
                         className="text-sm text-blue-600 hover:underline disabled:opacity-50"
-                        onClick={() => handleRemove(item.jewelryId)}
-                        disabled={itemLoading[item.jewelryId]}
+                        onClick={() => handleRemove(item.jewelryId._id)}
+                        disabled={itemLoading[item.jewelryId._id]}
                       >
                         Remove
                       </button>
-                      {itemLoading[item.jewelryId] && (
+                      {itemLoading[item.jewelryId._id] && (
                         <span className="ml-2 text-gray-500">Updating...</span>
                       )}
                     </div>
