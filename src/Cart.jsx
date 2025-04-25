@@ -6,6 +6,7 @@ const Cart = () => {
   const [cart, setCart] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [itemLoading, setItemLoading] = useState({}); // Per-item loading state
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ const Cart = () => {
         });
 
         const data = await response.json();
+        console.log("Fetch cart response:", data);
         if (response.ok) {
           setCart(data.items || []);
           setSubtotal(data.subtotal || 0);
@@ -32,6 +34,7 @@ const Cart = () => {
           setError(data.message || "Failed to load cart");
         }
       } catch (err) {
+        console.error("Fetch cart error:", err);
         setError("Error loading cart");
       } finally {
         setLoading(false);
@@ -41,8 +44,7 @@ const Cart = () => {
     fetchCart();
   }, []);
 
-  const handleQuantityChange = async (jewelryId, newQuantity) => {
-    if (newQuantity < 1) return; // Prevent invalid quantities
+  const handleQuantityChange = async (jewelryId, delta) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -51,14 +53,30 @@ const Cart = () => {
         return;
       }
 
-      setLoading(true);
+      const item = cart.find((item) => item.jewelryId.toString() === jewelryId);
+      if (!item) {
+        console.error("Item not found in cart:", jewelryId);
+        return;
+      }
+
+      const newQuantity = item.quantity + delta;
+      if (newQuantity < 1) {
+        console.log("Quantity cannot be less than 1");
+        return;
+      }
+
+      setItemLoading((prev) => ({ ...prev, [jewelryId]: true }));
       const previousCart = [...cart];
       const updatedCart = cart.map((item) =>
         item.jewelryId.toString() === jewelryId ? { ...item, quantity: newQuantity } : item
       );
       setCart(updatedCart);
-      const newSubtotal = updatedCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0);
+      const newSubtotal = updatedCart.reduce(
+        (sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity,
+        0
+      );
       setSubtotal(newSubtotal);
+      console.log("Quantity updated locally:", { jewelryId, newQuantity, newSubtotal });
 
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, {
         method: "PUT",
@@ -70,23 +88,30 @@ const Cart = () => {
       });
 
       const data = await response.json();
+      console.log("Update quantity response:", data);
       if (response.ok) {
-        setSubtotal(data.subtotal); // Sync with backend subtotal
+        setCart(data.items || updatedCart); // Sync with backend
+        setSubtotal(data.subtotal || newSubtotal);
       } else if (response.status === 401) {
         alert("Session expired. Please log in again.");
         localStorage.removeItem("token");
         navigate("/login");
       } else {
         setCart(previousCart);
-        setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
+        setSubtotal(
+          previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
+        );
         alert(data.message || "Failed to update quantity");
       }
     } catch (err) {
+      console.error("Update quantity error:", err);
       setCart(previousCart);
-      setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
+      setSubtotal(
+        previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
+      );
       alert("Error updating quantity");
     } finally {
-      setLoading(false);
+      setItemLoading((prev) => ({ ...prev, [jewelryId]: false }));
     }
   };
 
@@ -99,12 +124,16 @@ const Cart = () => {
         return;
       }
 
-      setLoading(true);
+      setItemLoading((prev) => ({ ...prev, [jewelryId]: true }));
       const previousCart = [...cart];
       const updatedCart = cart.filter((item) => item.jewelryId.toString() !== jewelryId);
       setCart(updatedCart);
-      const newSubtotal = updatedCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0);
+      const newSubtotal = updatedCart.reduce(
+        (sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity,
+        0
+      );
       setSubtotal(newSubtotal);
+      console.log("Item removed locally:", { jewelryId, newSubtotal });
 
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, {
         method: "DELETE",
@@ -114,7 +143,10 @@ const Cart = () => {
       });
 
       const data = await response.json();
+      console.log("Remove item response:", data);
       if (response.ok) {
+        setCart(data.items || updatedCart); // Sync with backend
+        setSubtotal(data.subtotal || newSubtotal);
         alert("Removed from cart!");
       } else if (response.status === 401) {
         alert("Session expired. Please log in again.");
@@ -122,15 +154,20 @@ const Cart = () => {
         navigate("/login");
       } else {
         setCart(previousCart);
-        setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
+        setSubtotal(
+          previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
+        );
         alert(data.message || "Failed to remove from cart");
       }
     } catch (err) {
+      console.error("Remove item error:", err);
       setCart(previousCart);
-      setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
+      setSubtotal(
+        previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
+      );
       alert("Error removing from cart");
     } finally {
-      setLoading(false);
+      setItemLoading((prev) => ({ ...prev, [jewelryId]: false }));
     }
   };
 
@@ -149,6 +186,7 @@ const Cart = () => {
       const previousCart = [...cart];
       setCart([]);
       setSubtotal(0);
+      console.log("Cart cleared locally");
 
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "DELETE",
@@ -157,6 +195,8 @@ const Cart = () => {
         },
       });
 
+      const data = await response.json();
+      console.log("Clear cart response:", data);
       if (response.ok) {
         alert("Cart cleared!");
       } else if (response.status === 401) {
@@ -165,12 +205,17 @@ const Cart = () => {
         navigate("/login");
       } else {
         setCart(previousCart);
-        setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
+        setSubtotal(
+          previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
+        );
         alert(data.message || "Failed to clear cart");
       }
     } catch (err) {
+      console.error("Clear cart error:", err);
       setCart(previousCart);
-      setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
+      setSubtotal(
+        previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
+      );
       alert("Error clearing cart");
     } finally {
       setLoading(false);
@@ -259,29 +304,41 @@ const Cart = () => {
                       {item.title}
                     </h2>
                     <p className="text-sm text-gray-500">In Stock</p>
-                    <p className="mt-1 text-lg font-bold text-gray-900">₹{item.price}</p>
+                    <p className="mt-1 text-lg font-bold text-gray-900">
+                      ₹{parseFloat(item.price || 0).toFixed(2)}
+                    </p>
                     <div className="flex items-center mt-2 space-x-4">
-                      <select
-                        value={item.quantity}
-                        onChange={(e) => handleQuantityChange(item.jewelryId, parseInt(e.target.value))}
-                        className="p-1 border border-gray-300 rounded-md"
-                        disabled={loading}
-                      >
-                        {[1, 2, 3, 4, 5].map((num) => (
-                          <option key={num} value={num}>{num}</option>
-                        ))}
-                      </select>
+                      <div className="flex items-center border border-gray-300 rounded-md">
+                        <button
+                          className="px-2 py-1 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                          onClick={() => handleQuantityChange(item.jewelryId, -1)}
+                          disabled={itemLoading[item.jewelryId] || item.quantity <= 1}
+                        >
+                          -
+                        </button>
+                        <span className="px-3 py-1 text-gray-900">{item.quantity}</span>
+                        <button
+                          className="px-2 py-1 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                          onClick={() => handleQuantityChange(item.jewelryId, 1)}
+                          disabled={itemLoading[item.jewelryId]} // Add stock check if needed
+                        >
+                          +
+                        </button>
+                      </div>
                       <button
-                        className="text-sm text-blue-600 hover:underline"
+                        className="text-sm text-blue-600 hover:underline disabled:opacity-50"
                         onClick={() => handleRemove(item.jewelryId)}
-                        disabled={loading}
+                        disabled={itemLoading[item.jewelryId]}
                       >
                         Remove
                       </button>
+                      {itemLoading[item.jewelryId] && (
+                        <span className="ml-2 text-gray-500">Updating...</span>
+                      )}
                     </div>
                   </div>
                   <p className="text-lg font-semibold text-gray-900">
-                    ₹{(parseFloat(item.price) * item.quantity).toFixed(2)}
+                    ₹{(parseFloat(item.price || 0) * item.quantity).toFixed(2)}
                   </p>
                 </div>
               ))}
@@ -297,7 +354,7 @@ const Cart = () => {
                 Subtotal ({cart.length} item{cart.length !== 1 ? "s" : ""}): ₹{subtotal.toFixed(2)}
               </h2>
               <button
-                className="w-full px-4 py-2 mt-4 text-sm font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
+                className="w-full px-4 py-2 mt-4 text-sm font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600 disabled:opacity-50"
                 onClick={handleProceedToCheckout}
                 disabled={loading}
               >
