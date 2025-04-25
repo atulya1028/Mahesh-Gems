@@ -42,14 +42,23 @@ const Cart = () => {
   }, []);
 
   const handleQuantityChange = async (jewelryId, newQuantity) => {
+    if (newQuantity < 1) return; // Prevent invalid quantities
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to update your cart");
+        navigate("/login");
+        return;
+      }
+
+      setLoading(true);
       const previousCart = [...cart];
-      setCart(
-        cart.map((item) =>
-          item.jewelryId.toString() === jewelryId ? { ...item, quantity: newQuantity } : item
-        )
+      const updatedCart = cart.map((item) =>
+        item.jewelryId.toString() === jewelryId ? { ...item, quantity: newQuantity } : item
       );
+      setCart(updatedCart);
+      const newSubtotal = updatedCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0);
+      setSubtotal(newSubtotal);
 
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, {
         method: "PUT",
@@ -62,22 +71,40 @@ const Cart = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setSubtotal(data.subtotal);
+        setSubtotal(data.subtotal); // Sync with backend subtotal
+      } else if (response.status === 401) {
+        alert("Session expired. Please log in again.");
+        localStorage.removeItem("token");
+        navigate("/login");
       } else {
         setCart(previousCart);
+        setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
         alert(data.message || "Failed to update quantity");
       }
     } catch (err) {
       setCart(previousCart);
+      setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
       alert("Error updating quantity");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleRemove = async (jewelryId) => {
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to remove items from your cart");
+        navigate("/login");
+        return;
+      }
+
+      setLoading(true);
       const previousCart = [...cart];
-      setCart(cart.filter((item) => item.jewelryId.toString() !== jewelryId));
+      const updatedCart = cart.filter((item) => item.jewelryId.toString() !== jewelryId);
+      setCart(updatedCart);
+      const newSubtotal = updatedCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0);
+      setSubtotal(newSubtotal);
 
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, {
         method: "DELETE",
@@ -88,15 +115,22 @@ const Cart = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setSubtotal(data.subtotal);
         alert("Removed from cart!");
+      } else if (response.status === 401) {
+        alert("Session expired. Please log in again.");
+        localStorage.removeItem("token");
+        navigate("/login");
       } else {
         setCart(previousCart);
+        setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
         alert(data.message || "Failed to remove from cart");
       }
     } catch (err) {
       setCart(previousCart);
+      setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
       alert("Error removing from cart");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,7 +166,6 @@ const Cart = () => {
       } else {
         setCart(previousCart);
         setSubtotal(previousCart.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0));
-        const data = await response.json();
         alert(data.message || "Failed to clear cart");
       }
     } catch (err) {
@@ -149,7 +182,6 @@ const Cart = () => {
       alert("Your cart is empty!");
       return;
     }
-    // Navigate to checkout page (implement as needed)
     navigate("/checkout");
   };
 
