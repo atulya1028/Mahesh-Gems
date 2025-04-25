@@ -116,8 +116,8 @@ const Layout = () => {
                 </div>
               )}
 
-              {["/", "/jewelry", "/about", "/contact", "/location", "/cart"].map((path, idx) => {
-                const names = ["Home", "Jewelry", "About Us", "Contact Us", "Location", "Cart"];
+              {["/", "/jewelry", "/about", "/contact", "/location"].map((path, idx) => {
+                const names = ["Home", "Jewelry", "About Us", "Contact Us", "Location"];
                 return (
                   <li key={path} className="border-b md:border-none">
                     <Link
@@ -194,13 +194,6 @@ const Layout = () => {
                       >
                         Wishlist
                       </Link>
-                      <Link
-                        to="/cart"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        Cart
-                      </Link>
                       <button
                         onClick={handleLogout}
                         className="block w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-gray-100"
@@ -223,13 +216,6 @@ const Layout = () => {
                         onClick={() => setDropdownOpen(false)}
                       >
                         Sign Up
-                      </Link>
-                      <Link
-                        to="/cart"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        Cart
                       </Link>
                     </div>
                   )}
