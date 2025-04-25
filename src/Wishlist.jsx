@@ -75,6 +75,7 @@ const Wishlist = () => {
 
       const data = await response.json();
       if (response.ok) {
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
         alert("Added to cart!");
         navigate("/cart");
       } else {

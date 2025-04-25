@@ -57,6 +57,7 @@ const Cart = () => {
       const data = await response.json();
       if (response.ok) {
         setCart(data.cart.items || []);
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
         alert("Removed from cart!");
       } else {
         alert(data.message || "Failed to remove from cart");
@@ -82,6 +83,7 @@ const Cart = () => {
       const data = await response.json();
       if (response.ok) {
         setCart([]);
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
         alert("Cart cleared!");
       } else {
         alert(data.message || "Failed to clear cart");
@@ -107,6 +109,7 @@ const Cart = () => {
       const data = await response.json();
       if (response.ok) {
         setCart(data.cart.items || []);
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
       } else {
         alert(data.message || "Failed to update quantity");
       }

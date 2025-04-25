@@ -33,7 +33,10 @@ const Layout = () => {
   const fetchCartCount = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) {
+        setCartCount(0);
+        return;
+      }
 
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         headers: {
@@ -45,9 +48,12 @@ const Layout = () => {
       if (response.ok) {
         const count = data.items ? data.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
         setCartCount(count);
+      } else {
+        setCartCount(0);
       }
     } catch (err) {
       console.error("Error fetching cart count:", err);
+      setCartCount(0);
     }
   };
 
@@ -59,8 +65,10 @@ const Layout = () => {
       fetchCartCount();
     };
     window.addEventListener("loginSuccess", handleLoginEvent);
+    window.addEventListener("cartUpdated", fetchCartCount);
     return () => {
       window.removeEventListener("loginSuccess", handleLoginEvent);
+      window.removeEventListener("cartUpdated", fetchCartCount);
     };
   }, []);
 
@@ -174,7 +182,7 @@ const Layout = () => {
                       </Link>
                       <Link
                         to="/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:b g-gray-100"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setDropdownOpen(false)}
                       >
                         My Orders
