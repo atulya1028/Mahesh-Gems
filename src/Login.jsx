@@ -36,11 +36,21 @@ const Login = () => {
     }
   };
 
+  // Optional: Explicitly handle Enter key on inputs (uncomment if needed)
+  /*
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === "Return") {
+      handleLogin(e);
+    }
+  };
+  */
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
       <form
         onSubmit={handleLogin}
         className="w-full max-w-md p-6 bg-white rounded-lg shadow"
+        aria-label="Login form"
       >
         <h2 className="mb-6 text-2xl font-semibold text-center">Login</h2>
 
@@ -55,6 +65,8 @@ const Login = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          aria-label="Email address"
+          // onKeyDown={handleKeyDown} // Uncomment if using explicit keydown handler
         />
 
         <input
@@ -64,11 +76,14 @@ const Login = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          aria-label="Password"
+          // onKeyDown={handleKeyDown} // Uncomment if using explicit keydown handler
         />
 
         <button
           type="submit"
-          className="w-full p-2 text-white bg-yellow-600 rounded hover:bg-yellow-700"
+          className="w-full p-2 text-white bg-yellow-600 rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
+          aria-label="Submit login"
         >
           Login
         </button>
