@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import loader from "./assets/loading.json";
 import emptyBox from "./assets/empty_box.json";
+import { Trash2 } from "lucide-react";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -202,7 +203,7 @@ const Cart = () => {
                     </h2>
                     <p className="text-sm text-gray-500">In Stock</p>
                     <p className="mt-1 text-lg font-bold text-gray-900">₹{item.price}</p>
-                    <div className="flex items-center mt-2 space-x-2">
+                    <div className="flex items-center mt-2 space-x-4">
                       <select
                         value={item.quantity}
                         onChange={(e) =>
@@ -220,11 +221,12 @@ const Cart = () => {
                         ))}
                       </select>
                       <button
-                        className="text-sm text-blue-600 hover:underline"
                         onClick={() => handleRemove(item.jewelryId._id || item.jewelryId)}
                         disabled={loading}
+                        className="text-gray-600 transition-colors hover:text-red-500"
+                        aria-label="Remove item from cart"
                       >
-                        Delete
+                        <Trash2 size={20} />
                       </button>
                     </div>
                   </div>
