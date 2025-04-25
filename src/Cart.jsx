@@ -6,7 +6,7 @@ const Cart = () => {
   const [cart, setCart] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [itemLoading, setItemLoading] = useState({}); // Per-item loading state
+  const [itemLoading, setItemLoading] = useState({});
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -19,6 +19,7 @@ const Cart = () => {
           return;
         }
 
+        console.log("Fetching cart with token:", token.slice(0, 10) + "...");
         const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -45,9 +46,11 @@ const Cart = () => {
   }, []);
 
   const handleQuantityChange = async (jewelryId, delta) => {
+    console.log("Quantity change triggered:", { jewelryId, delta });
     try {
       const token = localStorage.getItem("token");
       if (!token) {
+        console.log("No token found");
         alert("Please log in to update your cart");
         navigate("/login");
         return;
@@ -56,6 +59,7 @@ const Cart = () => {
       const item = cart.find((item) => item.jewelryId.toString() === jewelryId);
       if (!item) {
         console.error("Item not found in cart:", jewelryId);
+        alert("Item not found in cart");
         return;
       }
 
@@ -66,7 +70,7 @@ const Cart = () => {
       }
 
       setItemLoading((prev) => ({ ...prev, [jewelryId]: true }));
-      const previousCart = [...cart];
+      const previousCart = JSON.parse(JSON.stringify(cart)); // Deep copy
       const updatedCart = cart.map((item) =>
         item.jewelryId.toString() === jewelryId ? { ...item, quantity: newQuantity } : item
       );
@@ -76,8 +80,9 @@ const Cart = () => {
         0
       );
       setSubtotal(newSubtotal);
-      console.log("Quantity updated locally:", { jewelryId, newQuantity, newSubtotal });
+      console.log("Quantity updated locally:", { jewelryId, newQuantity, newSubtotal, updatedCart });
 
+      console.log("Sending PUT request:", { url: `https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, quantity: newQuantity });
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, {
         method: "PUT",
         headers: {
@@ -88,15 +93,24 @@ const Cart = () => {
       });
 
       const data = await response.json();
-      console.log("Update quantity response:", data);
+      console.log("Update quantity response:", { status: response.status, data });
       if (response.ok) {
-        setCart(data.items || updatedCart); // Sync with backend
+        setCart(data.items || updatedCart);
         setSubtotal(data.subtotal || newSubtotal);
       } else if (response.status === 401) {
+        console.log("Unauthorized: Redirecting to login");
         alert("Session expired. Please log in again.");
         localStorage.removeItem("token");
         navigate("/login");
+      } else if (response.status === 400 && data.message.includes("items in stock")) {
+        console.log("Stock limit reached:", data.message);
+        setCart(previousCart);
+        setSubtotal(
+          previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
+        );
+        alert(data.message);
       } else {
+        console.log("Update failed:", data.message);
         setCart(previousCart);
         setSubtotal(
           previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
@@ -109,23 +123,32 @@ const Cart = () => {
       setSubtotal(
         previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
       );
-      alert("Error updating quantity");
+      alert("Error updating quantity: " + err.message);
     } finally {
       setItemLoading((prev) => ({ ...prev, [jewelryId]: false }));
     }
   };
 
   const handleRemove = async (jewelryId) => {
+    console.log("Remove triggered:", { jewelryId });
     try {
       const token = localStorage.getItem("token");
       if (!token) {
+        console.log("No token found");
         alert("Please log in to remove items from your cart");
         navigate("/login");
         return;
       }
 
+      const item = cart.find((item) => item.jewelryId.toString() === jewelryId);
+      if (!item) {
+        console.error("Item not found in cart:", jewelryId);
+        alert("Item not found in cart");
+        return;
+      }
+
       setItemLoading((prev) => ({ ...prev, [jewelryId]: true }));
-      const previousCart = [...cart];
+      const previousCart = JSON.parse(JSON.stringify(cart)); // Deep copy
       const updatedCart = cart.filter((item) => item.jewelryId.toString() !== jewelryId);
       setCart(updatedCart);
       const newSubtotal = updatedCart.reduce(
@@ -133,8 +156,9 @@ const Cart = () => {
         0
       );
       setSubtotal(newSubtotal);
-      console.log("Item removed locally:", { jewelryId, newSubtotal });
+      console.log("Item removed locally:", { jewelryId, newSubtotal, updatedCart });
 
+      console.log("Sending DELETE request:", { url: `https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}` });
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, {
         method: "DELETE",
         headers: {
@@ -143,16 +167,18 @@ const Cart = () => {
       });
 
       const data = await response.json();
-      console.log("Remove item response:", data);
+      console.log("Remove item response:", { status: response.status, data });
       if (response.ok) {
-        setCart(data.items || updatedCart); // Sync with backend
+        setCart(data.items || updatedCart);
         setSubtotal(data.subtotal || newSubtotal);
         alert("Removed from cart!");
       } else if (response.status === 401) {
+        console.log("Unauthorized: Redirecting to login");
         alert("Session expired. Please log in again.");
         localStorage.removeItem("token");
         navigate("/login");
       } else {
+        console.log("Remove failed:", data.message);
         setCart(previousCart);
         setSubtotal(
           previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
@@ -165,29 +191,32 @@ const Cart = () => {
       setSubtotal(
         previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
       );
-      alert("Error removing from cart");
+      alert("Error removing from cart: " + err.message);
     } finally {
       setItemLoading((prev) => ({ ...prev, [jewelryId]: false }));
     }
   };
 
   const handleClearCart = async () => {
+    console.log("Clear cart triggered");
     if (!window.confirm("Are you sure you want to clear your cart?")) return;
 
     try {
       const token = localStorage.getItem("token");
       if (!token) {
+        console.log("No token found");
         alert("Please log in to clear your cart");
         navigate("/login");
         return;
       }
 
       setLoading(true);
-      const previousCart = [...cart];
+      const previousCart = JSON.parse(JSON.stringify(cart));
       setCart([]);
       setSubtotal(0);
       console.log("Cart cleared locally");
 
+      console.log("Sending DELETE request to clear cart");
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "DELETE",
         headers: {
@@ -196,14 +225,16 @@ const Cart = () => {
       });
 
       const data = await response.json();
-      console.log("Clear cart response:", data);
+      console.log("Clear cart response:", { status: response.status, data });
       if (response.ok) {
         alert("Cart cleared!");
       } else if (response.status === 401) {
+        console.log("Unauthorized: Redirecting to login");
         alert("Session expired. Please log in again.");
         localStorage.removeItem("token");
         navigate("/login");
       } else {
+        console.log("Clear cart failed:", data.message);
         setCart(previousCart);
         setSubtotal(
           previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
@@ -216,13 +247,14 @@ const Cart = () => {
       setSubtotal(
         previousCart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0)
       );
-      alert("Error clearing cart");
+      alert("Error clearing cart: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleProceedToCheckout = () => {
+    console.log("Proceed to checkout triggered");
     if (cart.length === 0) {
       alert("Your cart is empty!");
       return;
@@ -261,7 +293,7 @@ const Cart = () => {
             <div className="flex space-x-4">
               {cart.length > 0 && (
                 <button
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50"
                   onClick={handleClearCart}
                   disabled={loading}
                 >
@@ -320,7 +352,7 @@ const Cart = () => {
                         <button
                           className="px-2 py-1 text-gray-700 hover:bg-gray-100 disabled:opacity-50"
                           onClick={() => handleQuantityChange(item.jewelryId, 1)}
-                          disabled={itemLoading[item.jewelryId]} // Add stock check if needed
+                          disabled={itemLoading[item.jewelryId]}
                         >
                           +
                         </button>
