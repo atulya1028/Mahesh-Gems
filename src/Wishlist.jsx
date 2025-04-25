@@ -49,11 +49,11 @@ const Wishlist = () => {
         },
       });
 
+      const data = await response.json();
       if (response.ok) {
-        setWishlist(wishlist.filter((item) => item.jewelryId.toString() !== jewelryId));
+        setWishlist(data.wishlist.items || []);
         alert("Removed from wishlist!");
       } else {
-        const data = await response.json();
         alert(data.message || "Failed to remove from wishlist");
       }
     } catch (err) {
@@ -66,16 +66,6 @@ const Wishlist = () => {
 
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Please log in to clear your wishlist");
-        navigate("/login");
-        return;
-      }
-
-      setLoading(true);
-      const previousWishlist = wishlist; // Store for rollback
-      setWishlist([]); // Optimistic update
-
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/wishlist", {
         method: "DELETE",
         headers: {
@@ -83,28 +73,20 @@ const Wishlist = () => {
         },
       });
 
+      const data = await response.json();
       if (response.ok) {
+        setWishlist([]);
         alert("Wishlist cleared!");
-      } else if (response.status === 401) {
-        alert("Session expired. Please log in again.");
-        localStorage.removeItem("token");
-        navigate("/login");
       } else {
-        setWishlist(previousWishlist); // Revert on failure
-        const data = await response.json();
         alert(data.message || "Failed to clear wishlist");
       }
     } catch (err) {
-      setWishlist(previousWishlist); // Revert on error
       alert("Error clearing wishlist");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleAddToCart = (item) => {
     alert(`${item.title} added to cart!`);
-    // Optionally, implement cart API logic here
   };
 
   if (loading) {
@@ -164,7 +146,7 @@ const Wishlist = () => {
         <div className="space-y-4">
           {wishlist.map((item) => (
             <div
-              key={item.jewelryId}
+              key={item.jewelryId._id || item.jewelryId}
               className="flex items-start p-4 transition-shadow bg-white border rounded-lg shadow-sm hover:shadow-md"
             >
               <img
@@ -187,7 +169,7 @@ const Wishlist = () => {
                   </button>
                   <button
                     className="px-4 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                    onClick={() => handleRemove(item.jewelryId)}
+                    onClick={() => handleRemove(item.jewelryId._id || item.jewelryId)}
                     disabled={loading}
                   >
                     Delete
