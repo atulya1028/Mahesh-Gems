@@ -32,6 +32,7 @@ const App = () => {
           <Route path="jewelry/:id" element={<JewelryDetail />} />
           <Route path="wishlist" element={<Wishlist />} />
           <Route path="cart" element={<Cart />} />
+          <Route path="account" element={<MyAccount />} />
           <Route path="*" element={<NoPage />} />
         </Route>
         <Route path="/reset-password/:token" element={<ResetPassword />} />
