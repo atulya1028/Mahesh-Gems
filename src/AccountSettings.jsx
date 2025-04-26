@@ -47,7 +47,6 @@ const AccountSettings = () => {
     setSuccess("");
     setIsLoading(true);
 
-    // Validate form
     if (!formData.name || !formData.email) {
       setError("Name and email are required.");
       setIsLoading(false);
@@ -76,7 +75,7 @@ const AccountSettings = () => {
         updateData.password = formData.password;
       }
 
-      const response = await fetch("https://mahesh-gems-api.vercel.app/api/users/profile", {
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -99,8 +98,10 @@ const AccountSettings = () => {
         window.dispatchEvent(new CustomEvent("loginSuccess"));
       } else {
         setError(data.message || "Failed to update profile.");
+        console.error("API Error:", data);
       }
     } catch (err) {
+      console.error("Fetch Error:", err);
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
