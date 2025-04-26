@@ -14,6 +14,7 @@ import JewelryDetail from "./JewelryDetail";
 import ResetPassword from "./ResetPassword";
 import Wishlist from "./Wishlist";
 import Cart from "./Cart";
+import MyAccount from "./MyAccount";
 import "@fontsource/montserrat";
 
 const App = () => {

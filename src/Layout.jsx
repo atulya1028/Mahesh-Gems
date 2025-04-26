@@ -89,7 +89,7 @@ const Layout = () => {
       <nav className="fixed top-0 left-0 z-50 w-full bg-white shadow-sm font-montserrat">
         <div className="container flex items-center justify-between p-2 mx-auto md:justify-between">
           <div className="mr-2 md:hidden">
-            <button onClick={() => setIsOpen(true)}>
+            <button onClick={() => setIsOpen(true)} aria-label="Open navigation menu">
               <Menu size={24} className="text-gray-900" />
             </button>
           </div>
@@ -110,7 +110,7 @@ const Layout = () => {
             >
               {isOpen && (
                 <div className="flex justify-end p-4 md:hidden">
-                  <button onClick={() => setIsOpen(false)}>
+                  <button onClick={() => setIsOpen(false)} aria-label="Close navigation menu">
                     <X size={28} className="text-gray-700 hover:text-red-500" />
                   </button>
                 </div>
@@ -133,7 +133,11 @@ const Layout = () => {
             </ul>
 
             {/* Cart Icon with Badge */}
-            <Link to="/cart" className="relative">
+            <Link
+              to="/cart"
+              className="relative"
+              aria-label={`View cart with ${cartCount} items`}
+            >
               <ShoppingCart size={24} className="text-gray-600 hover:text-gray-900" />
               {cartCount > 0 && (
                 <span className="absolute flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-yellow-500 rounded-full -top-2 -right-2">
@@ -147,6 +151,7 @@ const Layout = () => {
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
                 className="flex items-center p-2 space-x-1 text-sm font-medium text-gray-700 transition-colors rounded-md md:text-base hover:bg-gray-100"
+                aria-label={isLoggedIn ? `Open user menu for ${user?.name}` : "Open account menu"}
               >
                 <User size={20} className="text-gray-600" />
                 <span>{isLoggedIn && user?.name ? `Hi, ${user.name.split(" ")[0]}` : "My Account"}</span>
@@ -197,6 +202,7 @@ const Layout = () => {
                       <button
                         onClick={handleLogout}
                         className="block w-full px-4 py-2 text-sm text-left text-red-600 hover:bg-gray-100"
+                        aria-label="Log out of your account"
                       >
                         Logout
                       </button>

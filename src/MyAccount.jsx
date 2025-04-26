@@ -101,7 +101,7 @@ const MyAccount = () => {
         {accountSections.map((section, index) => (
           <button
             key={index}
-            className="p-6 text-left transition-shadow bg-white border rounded-lg shadow-sm cursor-pointer hover:shadow-md"
+            className="p-6 text-left transition-shadow bg-white border rounded-lg shadow-sm cursor-pointer hover:shadow-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
             onClick={section.action ? section.action : () => navigate(section.path)}
             aria-label={section.ariaLabel}
           >
@@ -121,4 +121,4 @@ const MyAccount = () => {
   );
 };
 
-export default MyAccount;   
+export default MyAccount;
