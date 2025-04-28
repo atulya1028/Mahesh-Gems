@@ -171,7 +171,7 @@ const Cart = () => {
 
           {cart.length === 0 ? (
             <div className="p-6 text-center bg-white border rounded-lg shadow-sm">
-              <div className="mx-auto w-50">
+              <div className="mx-auto" style={{width: '350px'}}>
                 <Lottie animationData={emptyBox} loop autoPlay />
               </div>
               <p className="text-gray-600">Your cart is empty.</p>
