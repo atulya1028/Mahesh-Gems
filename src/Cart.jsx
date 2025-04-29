@@ -119,6 +119,16 @@ const Cart = () => {
     }
   };
 
+  // Handle Proceed to Checkout
+  const handleCheckout = () => {
+    if (!localStorage.getItem("token")) {
+      alert("Please log in to proceed to checkout");
+      navigate("/login");
+      return;
+    }
+    navigate("/checkout");
+  };
+
   // Calculate subtotal
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -248,7 +258,7 @@ const Cart = () => {
               </h2>
               <button
                 className="w-full px-6 py-3 mt-4 text-lg font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
-                onClick={() => alert("Proceeding to checkout!")}
+                onClick={handleCheckout}
               >
                 Proceed to Checkout
               </button>

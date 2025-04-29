@@ -91,6 +91,34 @@ const JewelryDetail = () => {
     }
   };
 
+  const handleBuyNow = async () => {
+    if (!jewelry) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to buy now");
+        navigate("/login");
+        return;
+      }
+
+      // Add item to cart temporarily for checkout
+      await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jewelryId: jewelry._id, quantity: 1 }),
+      });
+
+      navigate("/checkout");
+    } catch (err) {
+      console.error(err);
+      alert("Error proceeding to checkout");
+    }
+  };
+
   if (error) {
     return <div className="flex items-center justify-center h-screen text-xl text-red-500">{error}</div>;
   }
@@ -142,7 +170,7 @@ const JewelryDetail = () => {
               </button>
               <button
                 className="w-full px-6 py-3 text-lg font-medium text-white transition rounded-md bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => alert("Proceeding to buy now!")}
+                onClick={handleBuyNow}
               >
                 Buy Now
               </button>
