@@ -16,7 +16,6 @@ const Cart = () => {
     const fetchCart = async () => {
       try {
         const token = localStorage.getItem("token");
-        console.log("Cart - Token:", token); // Debug
         if (!token) {
           setError("Please log in to view your cart");
           setLoading(false);
@@ -30,14 +29,12 @@ const Cart = () => {
         });
 
         const data = await response.json();
-        console.log("Cart - Fetch response:", data); // Debug
         if (response.ok) {
           setCart(data.items || []);
         } else {
           setError(data.message || "Failed to load cart");
         }
       } catch (err) {
-        console.error("Cart - Fetch error:", err);
         setError("Error loading cart");
       } finally {
         setLoading(false);
@@ -59,7 +56,6 @@ const Cart = () => {
       });
 
       const data = await response.json();
-      console.log("Cart - Remove response:", data); // Debug
       if (response.ok) {
         setCart(data.cart.items || []);
         window.dispatchEvent(new CustomEvent("cartUpdated"));
@@ -68,7 +64,6 @@ const Cart = () => {
         alert(data.message || "Failed to remove from cart");
       }
     } catch (err) {
-      console.error("Cart - Remove error:", err);
       alert("Error removing from cart");
     }
   };
@@ -87,7 +82,6 @@ const Cart = () => {
       });
 
       const data = await response.json();
-      console.log("Cart - Clear cart response:", data); // Debug
       if (response.ok) {
         setCart([]);
         window.dispatchEvent(new CustomEvent("cartUpdated"));
@@ -96,7 +90,6 @@ const Cart = () => {
         alert(data.message || "Failed to clear cart");
       }
     } catch (err) {
-      console.error("Cart - Clear cart error:", err);
       alert("Error clearing cart");
     }
   };
@@ -115,7 +108,6 @@ const Cart = () => {
       });
 
       const data = await response.json();
-      console.log("Cart - Update quantity response:", data); // Debug
       if (response.ok) {
         setCart(data.cart.items || []);
         window.dispatchEvent(new CustomEvent("cartUpdated"));
@@ -123,21 +115,8 @@ const Cart = () => {
         alert(data.message || "Failed to update quantity");
       }
     } catch (err) {
-      console.error("Cart - Update quantity error:", err);
       alert("Error updating quantity");
     }
-  };
-
-  // Proceed to checkout
-  const handleProceedToCheckout = () => {
-    console.log("Cart - Proceed to checkout - Cart items:", cart); // Debug
-    if (cart.length === 0) {
-      setError("Your cart is empty. Add items to proceed to checkout.");
-      console.log("Cart - Proceed to checkout - Empty cart"); // Debug
-      return;
-    }
-    console.log("Cart - Navigating to /checkout"); // Debug
-    navigate("/checkout");
   };
 
   // Calculate subtotal
@@ -156,22 +135,19 @@ const Cart = () => {
   if (error) {
     return (
       <div className="container px-4 mx-auto mt-6 font-montserrat">
-        <p className="font-semibold text-red-500">{error}</p>
-        {error.includes("log in") && (
-          <button
-            className="mt-4 text-sm text-blue-600 hover:underline"
-            onClick={() => navigate("/login")}
-          >
-            Go to Login
-          </button>
-        )}
+        <p className="text-red-500">{error}</p>
+        <button
+          className="mt-4 text-sm text-blue-600 hover:underline"
+          onClick={() => navigate("/login")}
+        >
+          Go to Login
+        </button>
       </div>
     );
   }
 
   return (
     <div className="container px-4 mx-auto mt-6 font-montserrat">
-      {error && <p className="mb-4 text-sm font-semibold text-red-500">{error}</p>}
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Cart Items Section */}
         <div className="flex-1">
@@ -195,7 +171,7 @@ const Cart = () => {
 
           {cart.length === 0 ? (
             <div className="p-6 text-center bg-white border rounded-lg shadow-sm">
-              <div className="mx-auto" style={{ width: "350px" }}>
+              <div className="mx-auto" style={{width: '350px'}}>
                 <Lottie animationData={emptyBox} loop autoPlay />
               </div>
               <p className="text-gray-600">Your cart is empty.</p>
@@ -272,8 +248,7 @@ const Cart = () => {
               </h2>
               <button
                 className="w-full px-6 py-3 mt-4 text-lg font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
-                onClick={handleProceedToCheckout}
-                disabled={loading}
+                onClick={() => alert("Proceeding to checkout!")}
               >
                 Proceed to Checkout
               </button>
