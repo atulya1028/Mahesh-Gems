@@ -20,6 +20,7 @@ const Layout = () => {
     setDropdownOpen(false);
     setCartCount(0);
     navigate("/");
+    window.dispatchEvent(new CustomEvent("cartUpdated")); // Ensure cart count resets
   };
 
   const updateLoginState = () => {
@@ -27,6 +28,9 @@ const Layout = () => {
     const userData = JSON.parse(localStorage.getItem("user"));
     setIsLoggedIn(loggedIn);
     setUser(userData);
+    if (!loggedIn) {
+      setCartCount(0); // Reset cart count for logged-out users
+    }
   };
 
   // Fetch cart item count
@@ -44,26 +48,28 @@ const Layout = () => {
         },
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        const count = data.items ? data.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
-        setCartCount(count);
-      } else {
-        setCartCount(0);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
+
+      const data = await response.json();
+      const count = data.items ? data.items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+      setCartCount(count);
     } catch (err) {
-      console.error("Error fetching cart count:", err);
-      setCartCount(0);
+      console.error("Error fetching cart count:", err.message);
+      setCartCount(0); // Fallback to 0 on error
     }
   };
 
   useEffect(() => {
     updateLoginState();
     fetchCartCount();
+
     const handleLoginEvent = () => {
       updateLoginState();
       fetchCartCount();
     };
+
     window.addEventListener("loginSuccess", handleLoginEvent);
     window.addEventListener("cartUpdated", fetchCartCount);
     return () => {

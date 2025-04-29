@@ -102,8 +102,7 @@ const JewelryDetail = () => {
         return;
       }
 
-      // Add item to cart temporarily for checkout
-      await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -112,7 +111,13 @@ const JewelryDetail = () => {
         body: JSON.stringify({ jewelryId: jewelry._id, quantity: 1 }),
       });
 
-      navigate("/checkout");
+      const data = await response.json();
+      if (response.ok) {
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
+        navigate("/checkout");
+      } else {
+        alert(data.message || "Failed to proceed to checkout");
+      }
     } catch (err) {
       console.error(err);
       alert("Error proceeding to checkout");
