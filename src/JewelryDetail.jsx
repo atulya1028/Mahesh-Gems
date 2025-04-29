@@ -91,6 +91,53 @@ const JewelryDetail = () => {
     }
   };
 
+  const handleBuyNow = async () => {
+    if (!jewelry) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to proceed with purchase");
+        navigate("/login");
+        return;
+      }
+
+      // Clear existing cart to ensure only the "Buy Now" item is processed
+      const clearCartResponse = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!clearCartResponse.ok) {
+        alert("Failed to clear cart. Please try again.");
+        return;
+      }
+
+      // Add the current item to the cart
+      const addToCartResponse = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jewelryId: jewelry._id, quantity: 1 }),
+      });
+
+      const addToCartData = await addToCartResponse.json();
+      if (addToCartResponse.ok) {
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
+        navigate("/checkout");
+      } else {
+        alert(addToCartData.message || "Failed to proceed to checkout");
+      }
+    } catch (err) {
+      console.error("Buy Now error:", err);
+      alert("Error proceeding to checkout");
+    }
+  };
+
   if (error) {
     return <div className="flex items-center justify-center h-screen text-xl text-red-500">{error}</div>;
   }
@@ -142,7 +189,7 @@ const JewelryDetail = () => {
               </button>
               <button
                 className="w-full px-6 py-3 text-lg font-medium text-white transition rounded-md bg-emerald-600 hover:bg-emerald-700"
-                onClick={() => alert("Proceeding to buy now!")}
+                onClick={handleBuyNow}
               >
                 Buy Now
               </button>

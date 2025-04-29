@@ -16,6 +16,7 @@ const Cart = () => {
     const fetchCart = async () => {
       try {
         const token = localStorage.getItem("token");
+        console.log("Token:", token); // Debug: Check token
         if (!token) {
           setError("Please log in to view your cart");
           setLoading(false);
@@ -29,12 +30,14 @@ const Cart = () => {
         });
 
         const data = await response.json();
+        console.log("Cart data:", data); // Debug: Check API response
         if (response.ok) {
           setCart(data.items || []);
         } else {
           setError(data.message || "Failed to load cart");
         }
       } catch (err) {
+        console.error("Fetch error:", err); // Debug: Log errors
         setError("Error loading cart");
       } finally {
         setLoading(false);
@@ -121,6 +124,7 @@ const Cart = () => {
 
   // Proceed to checkout
   const handleProceedToCheckout = () => {
+    console.log("Cart items:", cart); // Debug: Check cart state
     if (cart.length === 0) {
       setError("Your cart is empty. Add items to proceed to checkout.");
       return;
@@ -144,7 +148,7 @@ const Cart = () => {
   if (error) {
     return (
       <div className="container px-4 mx-auto mt-6 font-montserrat">
-        <p className="text-red-500">{error}</p>
+        <p className="font-semibold text-red-500">{error}</p>
         {error.includes("log in") && (
           <button
             className="mt-4 text-sm text-blue-600 hover:underline"
@@ -159,6 +163,7 @@ const Cart = () => {
 
   return (
     <div className="container px-4 mx-auto mt-6 font-montserrat">
+      {error && <p className="mb-4 text-sm font-semibold text-red-500">{error}</p>}
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Cart Items Section */}
         <div className="flex-1">
