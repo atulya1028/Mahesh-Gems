@@ -124,7 +124,7 @@ const Order = () => {
                 {order.items.map((item) => (
                   <div
                     key={item.jewelryId._id || item.jewelryId}
-                    className="flex items-start py-2"
+                    className="flex items-center py-2"
                   >
                     <img
                       src={item.image}

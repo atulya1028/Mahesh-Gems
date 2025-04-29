@@ -399,12 +399,21 @@ const Checkout = () => {
             {cart.map((item) => (
               <div
                 key={item.jewelryId._id || item.jewelryId}
-                className="flex justify-between mb-2"
+                className="flex items-center mb-4"
               >
-                <span>
-                  {item.title} (x{item.quantity})
-                </span>
-                <span>₹{(item.price * item.quantity).toFixed(2)}</span>
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="object-contain w-16 h-16 mr-4 rounded"
+                />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">
+                    {item.title} (x{item.quantity})
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    ₹{(item.price * item.quantity).toFixed(2)}
+                  </p>
+                </div>
               </div>
             ))}
             <div className="flex justify-between mt-4 font-semibold">
