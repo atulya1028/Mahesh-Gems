@@ -119,6 +119,15 @@ const Cart = () => {
     }
   };
 
+  // Proceed to checkout
+  const handleProceedToCheckout = () => {
+    if (cart.length === 0) {
+      setError("Your cart is empty. Add items to proceed to checkout.");
+      return;
+    }
+    navigate("/checkout");
+  };
+
   // Calculate subtotal
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -136,12 +145,14 @@ const Cart = () => {
     return (
       <div className="container px-4 mx-auto mt-6 font-montserrat">
         <p className="text-red-500">{error}</p>
-        <button
-          className="mt-4 text-sm text-blue-600 hover:underline"
-          onClick={() => navigate("/login")}
-        >
-          Go to Login
-        </button>
+        {error.includes("log in") && (
+          <button
+            className="mt-4 text-sm text-blue-600 hover:underline"
+            onClick={() => navigate("/login")}
+          >
+            Go to Login
+          </button>
+        )}
       </div>
     );
   }
@@ -171,7 +182,7 @@ const Cart = () => {
 
           {cart.length === 0 ? (
             <div className="p-6 text-center bg-white border rounded-lg shadow-sm">
-              <div className="mx-auto" style={{width: '350px'}}>
+              <div className="mx-auto" style={{ width: "350px" }}>
                 <Lottie animationData={emptyBox} loop autoPlay />
               </div>
               <p className="text-gray-600">Your cart is empty.</p>
@@ -248,7 +259,8 @@ const Cart = () => {
               </h2>
               <button
                 className="w-full px-6 py-3 mt-4 text-lg font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
-                onClick={() => alert("Proceeding to checkout!")}
+                onClick={handleProceedToCheckout}
+                disabled={loading}
               >
                 Proceed to Checkout
               </button>

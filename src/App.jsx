@@ -16,6 +16,7 @@ import Wishlist from "./Wishlist";
 import Cart from "./Cart";
 import MyAccount from "./MyAccount";
 import AccountSettings from "./AccountSettings";
+import Checkout from "./Checkout";
 import "@fontsource/montserrat";
 
 const App = () => {
@@ -36,6 +37,7 @@ const App = () => {
           <Route path="cart" element={<Cart />} />
           <Route path="account" element={<MyAccount />} />
           <Route path="account/settings" element={<AccountSettings />} />
+          <Route path="checkout" element={<Checkout />} />
           <Route path="*" element={<NoPage />} />
         </Route>
         <Route path="/reset-password/:token" element={<ResetPassword />} />
