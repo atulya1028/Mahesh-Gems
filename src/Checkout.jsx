@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import loader from "./assets/loading.json";
+import { Country, State, City } from "country-state-city";
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -15,14 +16,58 @@ const Checkout = () => {
     city: "",
     state: "",
     postalCode: "",
-    country: "India",
+    country: "",
     phone: "",
     isDefault: false,
   });
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
 
+  // Load countries on component mount
+  useEffect(() => {
+    const countryList = Country.getAllCountries().map((country) => ({
+      isoCode: country.isoCode,
+      name: country.name,
+    }));
+    setCountries(countryList);
+  }, []);
+
+  // Update states when country changes
+  useEffect(() => {
+    if (newAddress.country) {
+      const stateList = State.getStatesOfCountry(newAddress.country).map((state) => ({
+        isoCode: state.isoCode,
+        name: state.name,
+      }));
+      setStates(stateList);
+      setCities([]);
+      setNewAddress((prev) => ({ ...prev, state: "", city: "" }));
+    } else {
+      setStates([]);
+      setCities([]);
+    }
+  }, [newAddress.country]);
+
+  // Update cities when state changes
+  useEffect(() => {
+    if (newAddress.country && newAddress.state) {
+      const cityList = City.getCitiesOfState(newAddress.country, newAddress.state).map(
+        (city) => ({
+          name: city.name,
+        })
+      );
+      setCities(cityList);
+      setNewAddress((prev) => ({ ...prev, city: "" }));
+    } else {
+      setCities([]);
+    }
+  }, [newAddress.state]);
+
+  // Fetch cart and addresses
   useEffect(() => {
     const fetchCartAndAddresses = async () => {
       try {
@@ -93,7 +138,7 @@ const Checkout = () => {
           city: "",
           state: "",
           postalCode: "",
-          country: "India",
+          country: "",
           phone: "",
           isDefault: false,
         });
@@ -137,18 +182,21 @@ const Checkout = () => {
         order_id: data.razorpayOrderId,
         handler: async function (response) {
           try {
-            const verifyResponse = await fetch("https://mahesh-gems-api.vercel.app/api/orders/verify", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                orderId: data.orderId,
-                paymentId: response.razorpay_payment_id,
-                signature: response.razorpay_signature,
-              }),
-            });
+            const verifyResponse = await fetch(
+              "https://mahesh-gems-api.vercel.app/api/orders/verify",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  orderId: data.orderId,
+                  paymentId: response.razorpay_payment_id,
+                  signature: response.razorpay_signature,
+                }),
+              }
+            );
 
             const verifyData = await verifyResponse.json();
             if (verifyResponse.ok) {
@@ -269,36 +317,53 @@ const Checkout = () => {
                 value={newAddress.addressLine2}
                 onChange={(e) => setNewAddress({ ...newAddress, addressLine2: e.target.value })}
               />
-              <input
-                type="text"
-                placeholder="City"
+              <select
+                className="w-full p-2 mb-3 border rounded"
+                value={newAddress.country}
+                onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
+                required
+              >
+                <option value="">Select Country</option>
+                {countries.map((country) => (
+                  <option key={country.isoCode} value={country.isoCode}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="w-full p-2 mb-3 border rounded"
+                value={newAddress.state}
+                onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                required
+                disabled={!newAddress.country}
+              >
+                <option value="">Select State</option>
+                {states.map((state) => (
+                  <option key={state.isoCode} value={state.isoCode}>
+                    {state.name}
+                  </option>
+                ))}
+              </select>
+              <select
                 className="w-full p-2 mb-3 border rounded"
                 value={newAddress.city}
                 onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
                 required
-              />
-              <input
-                type="text"
-                placeholder="State"
-                className="w-full p-2 mb-3 border rounded"
-                value={newAddress.state}
-                onChange={(e) => setNewAddress({ ...newAddress, state:  e.target.value })}
-                required
-              />
+                disabled={!newAddress.state}
+              >
+                <option value="">Select City</option>
+                {cities.map((city) => (
+                  <option key={city.name} value={city.name}>
+                    {city.name}
+                  </option>
+                ))}
+              </select>
               <input
                 type="text"
                 placeholder="Postal Code"
                 className="w-full p-2 mb-3 border rounded"
                 value={newAddress.postalCode}
                 onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
-                required
-              />
-              <input
-                type="text"
-                placeholder="Country"
-                className="w-full p-2 mb-3 border rounded"
-                value={newAddress.country}
-                onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
                 required
               />
               <input
@@ -332,7 +397,10 @@ const Checkout = () => {
           <div className="p-6 bg-white border rounded-lg shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">Order Summary</h2>
             {cart.map((item) => (
-              <div key={item.jewelryId._id || item.jewelryId} className="flex justify-between mb-2">
+              <div
+                key={item.jewelryId._id || item.jewelryId}
+                className="flex justify-between mb-2"
+              >
                 <span>
                   {item.title} (x{item.quantity})
                 </span>
