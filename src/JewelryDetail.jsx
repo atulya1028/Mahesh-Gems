@@ -19,7 +19,7 @@ const JewelryDetail = () => {
       })
       .then((data) => setJewelry(data))
       .catch((err) => {
-        console.error(err);
+        console.error("Fetch jewelry error:", err);
         setError("Unable to load jewelry details.");
       });
   }, [id]);
@@ -29,6 +29,7 @@ const JewelryDetail = () => {
 
     try {
       const token = localStorage.getItem("token");
+      console.log("Add to Cart - Token:", token); // Debug
       if (!token) {
         alert("Please log in to add to cart");
         navigate("/login");
@@ -45,6 +46,7 @@ const JewelryDetail = () => {
       });
 
       const data = await response.json();
+      console.log("Add to Cart - Response:", data); // Debug
       if (response.ok) {
         window.dispatchEvent(new CustomEvent("cartUpdated"));
         alert("Added to cart!");
@@ -53,7 +55,7 @@ const JewelryDetail = () => {
         alert(data.message || "Failed to add to cart");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Add to Cart error:", err);
       alert("Error adding to cart");
     }
   };
@@ -63,6 +65,7 @@ const JewelryDetail = () => {
 
     try {
       const token = localStorage.getItem("token");
+      console.log("Add to Wishlist - Token:", token); // Debug
       if (!token) {
         alert("Please log in to add to wishlist");
         navigate("/login");
@@ -79,6 +82,7 @@ const JewelryDetail = () => {
       });
 
       const data = await response.json();
+      console.log("Add to Wishlist - Response:", data); // Debug
       if (response.ok) {
         alert("Added to wishlist!");
         navigate("/wishlist");
@@ -86,23 +90,28 @@ const JewelryDetail = () => {
         alert(data.message || "Failed to add to wishlist");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Add to Wishlist error:", err);
       alert("Error adding to wishlist");
     }
   };
 
   const handleBuyNow = async () => {
-    if (!jewelry) return;
+    if (!jewelry) {
+      console.log("Buy Now - No jewelry data"); // Debug
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
+      console.log("Buy Now - Token:", token); // Debug
       if (!token) {
         alert("Please log in to proceed with purchase");
         navigate("/login");
         return;
       }
 
-      // Clear existing cart to ensure only the "Buy Now" item is processed
+      // Clear existing cart
+      console.log("Buy Now - Clearing cart"); // Debug
       const clearCartResponse = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "DELETE",
         headers: {
@@ -110,12 +119,15 @@ const JewelryDetail = () => {
         },
       });
 
+      const clearCartData = await clearCartResponse.json();
+      console.log("Buy Now - Clear cart response:", clearCartData); // Debug
       if (!clearCartResponse.ok) {
-        alert("Failed to clear cart. Please try again.");
+        alert(clearCartData.message || "Failed to clear cart. Please try again.");
         return;
       }
 
       // Add the current item to the cart
+      console.log("Buy Now - Adding item to cart"); // Debug
       const addToCartResponse = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "POST",
         headers: {
@@ -126,8 +138,10 @@ const JewelryDetail = () => {
       });
 
       const addToCartData = await addToCartResponse.json();
+      console.log("Buy Now - Add to cart response:", addToCartData); // Debug
       if (addToCartResponse.ok) {
         window.dispatchEvent(new CustomEvent("cartUpdated"));
+        console.log("Buy Now - Navigating to /checkout"); // Debug
         navigate("/checkout");
       } else {
         alert(addToCartData.message || "Failed to proceed to checkout");

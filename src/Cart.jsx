@@ -16,7 +16,7 @@ const Cart = () => {
     const fetchCart = async () => {
       try {
         const token = localStorage.getItem("token");
-        console.log("Token:", token); // Debug: Check token
+        console.log("Cart - Token:", token); // Debug
         if (!token) {
           setError("Please log in to view your cart");
           setLoading(false);
@@ -30,14 +30,14 @@ const Cart = () => {
         });
 
         const data = await response.json();
-        console.log("Cart data:", data); // Debug: Check API response
+        console.log("Cart - Fetch response:", data); // Debug
         if (response.ok) {
           setCart(data.items || []);
         } else {
           setError(data.message || "Failed to load cart");
         }
       } catch (err) {
-        console.error("Fetch error:", err); // Debug: Log errors
+        console.error("Cart - Fetch error:", err);
         setError("Error loading cart");
       } finally {
         setLoading(false);
@@ -59,6 +59,7 @@ const Cart = () => {
       });
 
       const data = await response.json();
+      console.log("Cart - Remove response:", data); // Debug
       if (response.ok) {
         setCart(data.cart.items || []);
         window.dispatchEvent(new CustomEvent("cartUpdated"));
@@ -67,6 +68,7 @@ const Cart = () => {
         alert(data.message || "Failed to remove from cart");
       }
     } catch (err) {
+      console.error("Cart - Remove error:", err);
       alert("Error removing from cart");
     }
   };
@@ -85,6 +87,7 @@ const Cart = () => {
       });
 
       const data = await response.json();
+      console.log("Cart - Clear cart response:", data); // Debug
       if (response.ok) {
         setCart([]);
         window.dispatchEvent(new CustomEvent("cartUpdated"));
@@ -93,6 +96,7 @@ const Cart = () => {
         alert(data.message || "Failed to clear cart");
       }
     } catch (err) {
+      console.error("Cart - Clear cart error:", err);
       alert("Error clearing cart");
     }
   };
@@ -111,6 +115,7 @@ const Cart = () => {
       });
 
       const data = await response.json();
+      console.log("Cart - Update quantity response:", data); // Debug
       if (response.ok) {
         setCart(data.cart.items || []);
         window.dispatchEvent(new CustomEvent("cartUpdated"));
@@ -118,17 +123,20 @@ const Cart = () => {
         alert(data.message || "Failed to update quantity");
       }
     } catch (err) {
+      console.error("Cart - Update quantity error:", err);
       alert("Error updating quantity");
     }
   };
 
   // Proceed to checkout
   const handleProceedToCheckout = () => {
-    console.log("Cart items:", cart); // Debug: Check cart state
+    console.log("Cart - Proceed to checkout - Cart items:", cart); // Debug
     if (cart.length === 0) {
       setError("Your cart is empty. Add items to proceed to checkout.");
+      console.log("Cart - Proceed to checkout - Empty cart"); // Debug
       return;
     }
+    console.log("Cart - Navigating to /checkout"); // Debug
     navigate("/checkout");
   };
 
