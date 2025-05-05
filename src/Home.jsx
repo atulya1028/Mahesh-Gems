@@ -201,7 +201,7 @@ const Home = () => {
                   className="block p-4 transition bg-white border rounded-lg shadow hover:shadow-md"
                 >
                   <img
-                    src={item.image || IoTimeSharp.images[0] || "https://via.placeholder.com/300"}
+                    src={item.image || item.images[0] || "https://via.placeholder.com/300"}
                     alt={item.title}
                     className="object-fill w-full h-48 rounded"
                   />
