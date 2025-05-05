@@ -115,7 +115,7 @@ const JewelryDetail = () => {
     }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!localStorage.getItem("token")) {
       alert("Please log in to proceed with Buy Now");
       navigate("/login");
@@ -130,6 +130,36 @@ const JewelryDetail = () => {
       return;
     }
 
+    // Add the item to the cart
+    try {
+      const token = localStorage.getItem("token");
+      console.log("Adding to cart for Buy Now:", { jewelryId: id, quantity: parsedQuantity }); // Debug
+
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jewelryId: id, quantity: parsedQuantity }),
+      });
+
+      const data = await response.json();
+      console.log("Buy Now - Add to cart response:", data); // Debug
+
+      if (!response.ok) {
+        alert(data.message || "Failed to add to cart for Buy Now");
+        return;
+      }
+
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
+      console.log("Cart updated event dispatched for Buy Now"); // Debug
+    } catch (err) {
+      console.error("Error adding to cart for Buy Now:", err); // Debug
+      alert("Error adding to cart for Buy Now: " + err.message);
+      return;
+    }
+
     // Navigate to checkout with the item details
     navigate("/checkout", {
       state: {
@@ -137,7 +167,7 @@ const JewelryDetail = () => {
           jewelryId: id,
           title: jewelry.title,
           price: jewelry.price,
-          image: jewelry.images[0] || jewelry.image,
+          image: jewelry.images[0] || "https://via.placeholder.com/150?text=No+Image",
           description: jewelry.description,
           quantity: parsedQuantity,
         },
