@@ -18,7 +18,10 @@ const JewelryDetail = () => {
         }
         return res.json();
       })
-      .then((data) => setJewelry(data))
+      .then((data) => {
+        console.log("API Response:", data); // Debug: Log API response
+        setJewelry(data);
+      })
       .catch((err) => {
         console.error(err);
         setError("Unable to load jewelry details.");
@@ -125,7 +128,17 @@ const JewelryDetail = () => {
     }
   };
 
-  const allMedia = jewelry ? [...(jewelry.images || []), ...(jewelry.videos || [])] : [];
+  const allMedia = jewelry
+    ? [
+        ...(jewelry.images || []),
+        ...(jewelry.videos || []),
+        ...(jewelry.image && (!jewelry.images || jewelry.images.length === 0) ? [jewelry.image] : []),
+      ]
+    : [];
+
+  useEffect(() => {
+    console.log("allMedia:", allMedia); // Debug: Log allMedia contents
+  }, [allMedia]);
 
   const handlePrevMedia = () => {
     setCurrentMediaIndex((prev) => (prev === 0 ? allMedia.length - 1 : prev - 1));
@@ -136,7 +149,7 @@ const JewelryDetail = () => {
   };
 
   const isVideo = (url) => {
-    return url.match(/\.(mp4|webm|ogg)$/i);
+    return url && url.match(/\.(mp4|webm|ogg)$/i);
   };
 
   if (error) {
@@ -170,6 +183,10 @@ const JewelryDetail = () => {
                   src={allMedia[currentMediaIndex]}
                   alt={jewelry.title}
                   className="object-contain w-full rounded-lg shadow-lg"
+                  onError={(e) => {
+                    console.error("Image failed to load:", allMedia[currentMediaIndex]);
+                    e.target.src = "https://via.placeholder.com/300"; // Fallback image
+                  }}
                 />
               )
             ) : (
@@ -214,6 +231,10 @@ const JewelryDetail = () => {
                     src={media}
                     alt={`Thumbnail ${index}`}
                     className="object-cover w-full h-full"
+                    onError={(e) => {
+                      console.error("Thumbnail failed to load:", media);
+                      e.target.src = "https://via.placeholder.com/100"; // Fallback thumbnail
+                    }}
                   />
                 )}
               </div>
