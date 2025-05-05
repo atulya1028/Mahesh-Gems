@@ -8,6 +8,7 @@ const JewelryDetail = () => {
   const navigate = useNavigate();
   const [jewelry, setJewelry] = useState(null);
   const [error, setError] = useState(null);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   useEffect(() => {
     fetch(`https://mahesh-gems-api.vercel.app/api/jewelry/${id}`)
@@ -124,6 +125,20 @@ const JewelryDetail = () => {
     }
   };
 
+  const allMedia = jewelry ? [...(jewelry.images || []), ...(jewelry.videos || [])] : [];
+
+  const handlePrevMedia = () => {
+    setCurrentMediaIndex((prev) => (prev === 0 ? allMedia.length - 1 : prev - 1));
+  };
+
+  const handleNextMedia = () => {
+    setCurrentMediaIndex((prev) => (prev === allMedia.length - 1 ? 0 : prev + 1));
+  };
+
+  const isVideo = (url) => {
+    return url.match(/\.(mp4|webm|ogg)$/i);
+  };
+
   if (error) {
     return <div className="flex items-center justify-center h-screen text-xl text-red-500">{error}</div>;
   }
@@ -141,12 +156,69 @@ const JewelryDetail = () => {
   return (
     <div className="container px-4 mx-auto mt-10 font-montserrat">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-        <div className="flex justify-center md:col-span-1">
-          <img
-            src={jewelry.image}
-            alt={jewelry.title}
-            className="object-contain w-full max-w-md rounded-lg shadow-lg"
-          />
+        <div className="flex flex-col items-center md:col-span-1">
+          <div className="relative w-full max-w-md">
+            {allMedia.length > 0 ? (
+              isVideo(allMedia[currentMediaIndex]) ? (
+                <video
+                  src={allMedia[currentMediaIndex]}
+                  controls
+                  className="object-contain w-full rounded-lg shadow-lg"
+                />
+              ) : (
+                <img
+                  src={allMedia[currentMediaIndex]}
+                  alt={jewelry.title}
+                  className="object-contain w-full rounded-lg shadow-lg"
+                />
+              )
+            ) : (
+              <div className="flex items-center justify-center w-full h-64 bg-gray-200 rounded-lg">
+                No media available
+              </div>
+            )}
+            {allMedia.length > 1 && (
+              <>
+                <button
+                  className="absolute p-2 text-white transform -translate-y-1/2 bg-gray-800 rounded-full left-2 top-1/2"
+                  onClick={handlePrevMedia}
+                >
+                  ←
+                </button>
+                <button
+                  className="absolute p-2 text-white transform -translate-y-1/2 bg-gray-800 rounded-full right-2 top-1/2"
+                  onClick={handleNextMedia}
+                >
+                  →
+                </button>
+              </>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2 mt-4">
+            {allMedia.map((media, index) => (
+              <div
+                key={index}
+                className={`w-16 h-16 cursor-pointer rounded-md overflow-hidden ${
+                  index === currentMediaIndex ? "border-2 border-yellow-500" : ""
+                }`}
+                onClick={() => setCurrentMediaIndex(index)}
+              >
+                {isVideo(media) ? (
+                  <video
+                    src={media}
+                    className="object-cover w-full h-full"
+                    muted
+                  />
+                ) : (
+                  <img
+                    src={media}
+                    alt={`Thumbnail ${index}`}
+                    className="object-cover w-full h-full"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
         <div className="md:col-span-1">
           <h1 className="text-2xl font-bold text-gray-800">{jewelry.title}</h1>
