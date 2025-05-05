@@ -275,38 +275,26 @@ const JewelryDetail = () => {
           </div>
         </div>
 
-        {/* Product Details */}
+        {/* Jewelry Details */}
         <div className="lg:col-span-1">
           <h1 className="mb-2 text-2xl font-bold text-gray-900">{jewelry.title}</h1>
-          <div className="flex items-center mb-2">
-            <div className="flex text-yellow-400">
-              {[...Array(5)].map((_, i) => (
-                <svg
-                  key={i}
-                  className={`w-5 h-5 ${i < 4 ? "fill-current" : "text-gray-300"}`}
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M10 15l-5.5 3 1.5-5.5L2 8.5l5.5-.5L10 3l2.5 5 5.5.5-4 4 1.5 5.5z" />
-                </svg>
-              ))}
-            </div>
-            <span className="ml-2 text-sm text-blue-600 cursor-pointer hover:underline">
-              1,234 ratings
-            </span>
-          </div>
           <p className="mb-2 text-sm text-green-600">In Stock</p>
           <p className="mb-4 text-3xl font-bold text-gray-900">₹{jewelry.price}</p>
           <p className="mb-4 text-gray-600">{jewelry.description}</p>
 
-          {/* Product Highlights */}
-          <div className="mb-6">
-            <h3 className="mb-2 text-lg font-semibold text-gray-900">Product Highlights</h3>
-            <ul className="pl-5 text-sm text-gray-600 list-disc">
-              <li>Premium quality craftsmanship</li>
-              <li>Made with authentic gemstones</li>
-              <li>Perfect for gifting or personal use</li>
-              <li>Free shipping on orders over ₹500</li>
-            </ul>
+          {/* Quantity Selector */}
+          <div className="flex items-center mb-4">
+            <label htmlFor="quantity" className="mr-2 text-sm text-gray-700">
+              Quantity:
+            </label>
+            <input
+              type="number"
+              id="quantity"
+              min="1"
+              value={quantity}
+              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+              className="w-16 p-2 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            />
           </div>
 
           {/* Back to Shopping */}
@@ -324,14 +312,14 @@ const JewelryDetail = () => {
             <p className="mb-4 text-2xl font-bold text-gray-900">₹{jewelry.price}</p>
             <p className="mb-4 text-sm text-gray-600">FREE delivery by Tomorrow</p>
 
-            {/* Quantity Selector */}
+            {/* Quantity Selector (Repeated for Sidebar) */}
             <div className="flex items-center mb-4">
-              <label htmlFor="quantity" className="mr-2 text-sm text-gray-700">
+              <label htmlFor="quantity-sidebar" className="mr-2 text-sm text-gray-700">
                 Qty:
               </label>
               <input
                 type="number"
-                id="quantity"
+                id="quantity-sidebar"
                 min="1"
                 value={quantity}
                 onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
@@ -358,50 +346,6 @@ const JewelryDetail = () => {
             >
               Add to Wishlist
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Frequently Bought Together */}
-      <div className="mt-12">
-        <h3 className="mb-4 text-xl font-semibold text-gray-900">Frequently Bought Together</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-              <img
-                src="https://via.placeholder.com/150?text=Product"
-                alt="Related Product"
-                className="object-contain w-full h-40 mb-2"
-              />
-              <p className="text-sm font-medium text-gray-900">Related Jewelry Item</p>
-              <p className="text-sm text-gray-600">₹1,999</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Customer Reviews */}
-      <div className="mt-12">
-        <h3 className="mb-4 text-xl font-semibold text-gray-900">Customer Reviews</h3>
-        <div className="space-y-4">
-          <div className="pb-4 border-b border-gray-200">
-            <div className="flex items-center mb-2">
-              <div className="flex text-yellow-400">
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className={`w-4 h-4 ${i < 4 ? "fill-current" : "text-gray-300"}`}
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M10 15l-5.5 3 1.5-5.5L2 8.5l5.5-.5L10 3l2.5 5 5.5.5-4 4 1.5 5.5z" />
-                  </svg>
-                ))}
-              </div>
-              <span className="ml-2 text-sm text-gray-600">Verified Purchase</span>
-            </div>
-            <p className="text-sm text-gray-600">
-              Beautiful piece of jewelry! The quality is amazing and it arrived quickly.
-            </p>
           </div>
         </div>
       </div>
