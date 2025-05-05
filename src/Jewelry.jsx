@@ -14,8 +14,6 @@ const Jewelry = () => {
   const [showFilter, setShowFilter] = useState(false);
   const filterRef = useRef(null);
 
-
-
   useEffect(() => {
     fetch("https://mahesh-gems-api.vercel.app/api/jewelry")
       .then((res) => {
@@ -39,7 +37,6 @@ const Jewelry = () => {
         setError("Failed to load jewelry.");
         setLoading(false);
       });
-   
   }, []);
 
   useEffect(() => {
@@ -168,7 +165,11 @@ const Jewelry = () => {
                   className="block p-4 transition bg-white border rounded-lg shadow hover:shadow-md"
                 >
                   <img
-                    src={jewelry.image || "https://via.placeholder.com/300"}
+                    src={
+                      jewelry.images && jewelry.images.length > 0
+                        ? jewelry.images[0]
+                        : jewelry.image || "https://via.placeholder.com/300"
+                    }
                     alt={jewelry.title}
                     className="object-fill w-full h-48 rounded"
                   />
