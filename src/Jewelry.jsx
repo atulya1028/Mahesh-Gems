@@ -168,7 +168,7 @@ const Jewelry = () => {
                   className="block p-4 transition bg-white border rounded-lg shadow hover:shadow-md"
                 >
                   <img
-                    src={jewelry.image || "https://via.placeholder.com/300"}
+                    src={jewelry.image || jewelry.images[0] || "https://via.placeholder.com/300"}
                     alt={jewelry.title}
                     className="object-fill w-full h-48 rounded"
                   />
