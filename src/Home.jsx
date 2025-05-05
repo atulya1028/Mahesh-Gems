@@ -32,6 +32,7 @@ const Home = () => {
           if (title.includes("earring")) category = "earring";
           else if (title.includes("bracelet")) category = "bracelet";
           else if (title.includes("pendant")) category = "pendant";
+          else if (title.includes("ring")) category = "ring";
           return { ...item, category };
         });
 
@@ -77,6 +78,7 @@ const Home = () => {
       case "earring":
       case "bracelet":
       case "pendant":
+      case "ring":
         matchesCombined = item.category === combinedFilter;
         break;
       default:
@@ -148,6 +150,7 @@ const Home = () => {
                       <option value="earring">Earrings</option>
                       <option value="bracelet">Bracelets</option>
                       <option value="pendant">Pendants</option>
+                      <option value="ring">Rings</option>
                     </optgroup>
                   </select>
                 </div>
