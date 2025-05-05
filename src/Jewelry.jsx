@@ -27,6 +27,7 @@ const Jewelry = () => {
           if (title.includes("earring")) category = "earring";
           else if (title.includes("bracelet")) category = "bracelet";
           else if (title.includes("pendant")) category = "pendant";
+          else if (title.includes("ring")) category = "ring";
           return { ...item, category };
         });
         setJewelry(updated);
@@ -68,6 +69,7 @@ const Jewelry = () => {
       case "earring":
       case "bracelet":
       case "pendant":
+        case "ring":
         matchesFilter = jewelry.category === filter;
         break;
       default:
