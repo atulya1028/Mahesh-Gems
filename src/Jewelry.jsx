@@ -1,13 +1,11 @@
 import Lottie from "lottie-react";
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import loader from "./assets/loading.json";
 import emptyBox from "./assets/empty_box.json";
 import { FunnelIcon } from "@heroicons/react/24/outline";
-import { HeartIcon } from "@heroicons/react/24/outline"; // For wishlist button
 
 const Jewelry = () => {
-  const navigate = useNavigate();
   const [jewelries, setJewelry] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
@@ -29,6 +27,7 @@ const Jewelry = () => {
           if (title.includes("earring")) category = "earring";
           else if (title.includes("bracelet")) category = "bracelet";
           else if (title.includes("pendant")) category = "pendant";
+          else if (title.includes("ring")) category = "ring";
           return { ...item, category };
         });
         setJewelry(updated);
@@ -70,6 +69,7 @@ const Jewelry = () => {
       case "earring":
       case "bracelet":
       case "pendant":
+      case "ring":
         matchesFilter = jewelry.category === filter;
         break;
       default:
@@ -78,36 +78,6 @@ const Jewelry = () => {
 
     return matchesSearch && matchesFilter;
   });
-
-  const handleAddToWishlist = async (jewelryId) => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Please log in to add to wishlist");
-        navigate("/login");
-        return;
-      }
-
-      const response = await fetch("https://mahesh-gems-api.vercel.app/api/wishlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ jewelryId }),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        alert("Added to wishlist!");
-        window.dispatchEvent(new CustomEvent("wishlistUpdated")); // Notify Wishlist.jsx to refresh
-      } else {
-        alert(data.message || "Failed to add to wishlist");
-      }
-    } catch (err) {
-      alert("Error adding to wishlist");
-    }
-  };
 
   return (
     <div className="font-montserrat">
@@ -162,6 +132,7 @@ const Jewelry = () => {
                       <option value="earring">Earrings</option>
                       <option value="bracelet">Bracelets</option>
                       <option value="pendant">Pendants</option>
+                      <option value="ring">Rings</option>
                     </optgroup>
                   </select>
                 </div>
@@ -208,14 +179,6 @@ const Jewelry = () => {
                       ₹{jewelry.price}
                     </h4>
                   </Link>
-                  {/* Add to Wishlist Button */}
-                  <button
-                    onClick={() => handleAddToWishlist(jewelry._id)}
-                    className="absolute p-2 text-gray-600 top-2 right-2 hover:text-red-500"
-                    title="Add to Wishlist"
-                  >
-                    <HeartIcon className="w-6 h-6" />
-                  </button>
                 </div>
               ))
             ) : (
