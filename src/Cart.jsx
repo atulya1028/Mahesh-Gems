@@ -10,43 +10,56 @@ const Cart = () => {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isActionLoading, setIsActionLoading] = useState(false); // For remove/clear/update actions
 
-  // Fetch cart items
-  useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("Please log in to view your cart");
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-          setCart(data.items || []);
-        } else {
-          setError(data.message || "Failed to load cart");
-        }
-      } catch (err) {
-        setError("Error loading cart");
-      } finally {
+  const fetchCart = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Please log in to view your cart");
         setLoading(false);
+        return;
       }
+
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setCart(data.items || []);
+        setError(null);
+      } else {
+        setError(data.message || "Failed to load cart");
+      }
+    } catch (err) {
+      setError("Error loading cart");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch cart items and listen for updates
+  useEffect(() => {
+    fetchCart();
+
+    const handleCartUpdate = () => {
+      fetchCart();
     };
 
-    fetchCart();
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
   }, []);
 
   // Remove item from cart
   const handleRemove = async (jewelryId) => {
     try {
+      setIsActionLoading(true);
       const token = localStorage.getItem("token");
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, {
         method: "DELETE",
@@ -65,6 +78,8 @@ const Cart = () => {
       }
     } catch (err) {
       alert("Error removing from cart");
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -73,6 +88,7 @@ const Cart = () => {
     if (!window.confirm("Are you sure you want to clear your cart?")) return;
 
     try {
+      setIsActionLoading(true);
       const token = localStorage.getItem("token");
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "DELETE",
@@ -91,12 +107,15 @@ const Cart = () => {
       }
     } catch (err) {
       alert("Error clearing cart");
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
   // Update item quantity
   const handleUpdateQuantity = async (jewelryId, quantity) => {
     try {
+      setIsActionLoading(true);
       const token = localStorage.getItem("token");
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/cart/${jewelryId}`, {
         method: "PUT",
@@ -116,6 +135,8 @@ const Cart = () => {
       }
     } catch (err) {
       alert("Error updating quantity");
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -172,7 +193,7 @@ const Cart = () => {
               <button
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
                 onClick={handleClearCart}
-                disabled={loading}
+                disabled={isActionLoading}
               >
                 Clear Cart
               </button>
@@ -223,6 +244,7 @@ const Cart = () => {
                           )
                         }
                         className="p-1 border rounded-md"
+                        disabled={isActionLoading}
                       >
                         {[...Array(10).keys()].map((i) => (
                           <option key={i + 1} value={i + 1}>
@@ -232,7 +254,7 @@ const Cart = () => {
                       </select>
                       <button
                         onClick={() => handleRemove(item.jewelryId._id || item.jewelryId)}
-                        disabled={loading}
+                        disabled={isActionLoading}
                         className="text-gray-600 transition-colors hover:text-red-500"
                         aria-label="Remove item from cart"
                       >

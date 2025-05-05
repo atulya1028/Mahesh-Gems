@@ -1,11 +1,13 @@
 import Lottie from "lottie-react";
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import loader from "./assets/loading.json";
 import emptyBox from "./assets/empty_box.json";
 import { FunnelIcon } from "@heroicons/react/24/outline";
+import { HeartIcon } from "@heroicons/react/24/outline"; // For wishlist button
 
 const Jewelry = () => {
+  const navigate = useNavigate();
   const [jewelries, setJewelry] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
@@ -13,8 +15,6 @@ const Jewelry = () => {
   const [error, setError] = useState(null);
   const [showFilter, setShowFilter] = useState(false);
   const filterRef = useRef(null);
-
-
 
   useEffect(() => {
     fetch("https://mahesh-gems-api.vercel.app/api/jewelry")
@@ -39,7 +39,6 @@ const Jewelry = () => {
         setError("Failed to load jewelry.");
         setLoading(false);
       });
-   
   }, []);
 
   useEffect(() => {
@@ -79,6 +78,36 @@ const Jewelry = () => {
 
     return matchesSearch && matchesFilter;
   });
+
+  const handleAddToWishlist = async (jewelryId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to add to wishlist");
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/wishlist", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ jewelryId }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Added to wishlist!");
+        window.dispatchEvent(new CustomEvent("wishlistUpdated")); // Notify Wishlist.jsx to refresh
+      } else {
+        alert(data.message || "Failed to add to wishlist");
+      }
+    } catch (err) {
+      alert("Error adding to wishlist");
+    }
+  };
 
   return (
     <div className="font-montserrat">
@@ -162,23 +191,32 @@ const Jewelry = () => {
           <div className="grid grid-cols-1 gap-6 mt-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {filteredJewelry.length > 0 ? (
               filteredJewelry.map((jewelry) => (
-                <Link
+                <div
                   key={jewelry._id}
-                  to={`/jewelry/${jewelry._id}`}
-                  className="block p-4 transition bg-white border rounded-lg shadow hover:shadow-md"
+                  className="relative p-4 transition bg-white border rounded-lg shadow hover:shadow-md"
                 >
-                  <img
-                    src={jewelry.image || jewelry.images[0] || "https://via.placeholder.com/300"}
-                    alt={jewelry.title}
-                    className="object-fill w-full h-48 rounded"
-                  />
-                  <h3 className="mt-4 mb-2 text-lg font-medium sm:text-xl">
-                    {jewelry.title}
-                  </h3>
-                  <h4 className="font-semibold text-gray-700 text-md sm:text-lg">
-                    ₹{jewelry.price}
-                  </h4>
-                </Link>
+                  <Link to={`/jewelry/${jewelry._id}`}>
+                    <img
+                      src={jewelry.image || jewelry.images[0] || "https://via.placeholder.com/300"}
+                      alt={jewelry.title}
+                      className="object-fill w-full h-48 rounded"
+                    />
+                    <h3 className="mt-4 mb-2 text-lg font-medium sm:text-xl">
+                      {jewelry.title}
+                    </h3>
+                    <h4 className="font-semibold text-gray-700 text-md sm:text-lg">
+                      ₹{jewelry.price}
+                    </h4>
+                  </Link>
+                  {/* Add to Wishlist Button */}
+                  <button
+                    onClick={() => handleAddToWishlist(jewelry._id)}
+                    className="absolute p-2 text-gray-600 top-2 right-2 hover:text-red-500"
+                    title="Add to Wishlist"
+                  >
+                    <HeartIcon className="w-6 h-6" />
+                  </button>
+                </div>
               ))
             ) : (
               <div className="flex flex-col items-center justify-center text-center text-gray-500 col-span-full">

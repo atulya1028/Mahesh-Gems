@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Lottie from "lottie-react";
 import loader from "./assets/loading.json";
 import { Country, State, City } from "country-state-city";
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const [cart, setCart] = useState([]);
+  const location = useLocation();
+  const { buyNowItem } = location.state || {}; // Item passed from "Buy Now"
+
+  const [cart, setCart] = useState([]); // For cart checkout
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [newAddress, setNewAddress] = useState({
@@ -23,9 +26,24 @@ const Checkout = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isActionLoading, setIsActionLoading] = useState(false); // For address saving and payment
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+
+  // Load Razorpay script on mount
+  useEffect(() => {
+    const loadRazorpayScript = () => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => setRazorpayLoaded(true);
+      script.onerror = () => setError("Failed to load Razorpay payment system");
+      document.body.appendChild(script);
+    };
+    loadRazorpayScript();
+  }, []);
 
   // Load countries on component mount
   useEffect(() => {
@@ -67,7 +85,7 @@ const Checkout = () => {
     }
   }, [newAddress.state]);
 
-  // Fetch cart and addresses
+  // Fetch cart (if not "Buy Now") and addresses
   useEffect(() => {
     const fetchCartAndAddresses = async () => {
       try {
@@ -78,43 +96,56 @@ const Checkout = () => {
           return;
         }
 
-        const [cartResponse, addressesResponse] = await Promise.all([
-          fetch("https://mahesh-gems-api.vercel.app/api/cart", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("https://mahesh-gems-api.vercel.app/api/orders/addresses", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+        const fetchWithRetry = async (url, options, retries = 1) => {
+          try {
+            const response = await fetch(url, options);
+            if (!response.ok) throw new Error((await response.json()).message || "Request failed");
+            return response.json();
+          } catch (err) {
+            if (retries > 0) {
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+              return fetchWithRetry(url, options, retries - 1);
+            }
+            throw err;
+          }
+        };
+
+        const headers = { Authorization: `Bearer ${token}` };
+        const [cartData, addressesData] = await Promise.all([
+          !buyNowItem
+            ? fetchWithRetry("https://mahesh-gems-api.vercel.app/api/cart", { headers })
+            : Promise.resolve(null),
+          fetchWithRetry("https://mahesh-gems-api.vercel.app/api/orders/addresses", { headers }),
         ]);
 
-        const cartData = await cartResponse.json();
-        const addressesData = await addressesResponse.json();
-
-        if (cartResponse.ok && cartData.items) {
-          setCart(cartData.items);
-        } else {
-          setError(cartData.message || "Failed to load cart");
-        }
-
-        if (addressesResponse.ok && addressesData.addresses) {
+        if (addressesData.addresses) {
           setAddresses(addressesData.addresses);
           const defaultAddress = addressesData.addresses.find((addr) => addr.isDefault);
           setSelectedAddress(defaultAddress?._id || null);
         } else {
           setError(addressesData.message || "Failed to load addresses");
         }
+
+        if (!buyNowItem) {
+          if (cartData.items) {
+            setCart(cartData.items);
+          } else {
+            setError(cartData.message || "Failed to load cart");
+          }
+        }
       } catch (err) {
-        setError("Error loading checkout data");
+        setError(err.message || "Error loading checkout data");
       } finally {
         setLoading(false);
       }
     };
 
     fetchCartAndAddresses();
-  }, []);
+  }, [buyNowItem]);
 
   const handleAddAddress = async (e) => {
     e.preventDefault();
+    setIsActionLoading(true);
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/orders/address", {
@@ -142,11 +173,14 @@ const Checkout = () => {
           phone: "",
           isDefault: false,
         });
+        alert("Address added successfully!");
       } else {
         alert(data.message || "Failed to add address");
       }
     } catch (err) {
       alert("Error adding address");
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -155,31 +189,41 @@ const Checkout = () => {
       alert("Please select or add a shipping address");
       return;
     }
+    if (!razorpayLoaded) {
+      alert("Payment system is not loaded. Please try again.");
+      return;
+    }
 
+    setIsActionLoading(true);
     try {
       const token = localStorage.getItem("token");
+      const body = buyNowItem
+        ? { addressId: selectedAddress, items: [buyNowItem] }
+        : { addressId: selectedAddress };
+
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/orders/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ addressId: selectedAddress }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
       if (!response.ok) {
-        alert(data.message || "Failed to create order");
-        return;
+        throw new Error(data.message || "Failed to create order");
       }
 
+      const { orderId, razorpayOrderId, amount, currency, key } = data;
+
       const options = {
-        key: data.key,
-        amount: data.amount * 100,
-        currency: data.currency,
+        key: key,
+        amount: amount * 100,
+        currency: currency,
         name: "Mahesh Gems",
         description: "Order Payment",
-        order_id: data.razorpayOrderId,
+        order_id: razorpayOrderId,
         handler: async function (response) {
           try {
             const verifyResponse = await fetch(
@@ -191,7 +235,7 @@ const Checkout = () => {
                   Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                  orderId: data.orderId,
+                  orderId: orderId,
                   paymentId: response.razorpay_payment_id,
                   signature: response.razorpay_signature,
                 }),
@@ -222,11 +266,14 @@ const Checkout = () => {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      alert("Error initiating checkout");
+      alert(err.message || "Error initiating checkout");
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const items = buyNowItem ? [buyNowItem] : cart;
+  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (loading) {
     return (
@@ -247,6 +294,20 @@ const Checkout = () => {
           onClick={() => navigate("/login")}
         >
           Go to Login
+        </button>
+      </div>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="container px-4 mx-auto mt-6 font-montserrat">
+        <p className="text-gray-600">Your cart is empty.</p>
+        <button
+          className="mt-4 text-sm text-blue-600 hover:underline"
+          onClick={() => navigate("/jewelry")}
+        >
+          Continue Shopping
         </button>
       </div>
     );
@@ -287,6 +348,7 @@ const Checkout = () => {
           <button
             className="mt-4 text-sm text-blue-600 hover:underline"
             onClick={() => setShowAddressForm(!showAddressForm)}
+            disabled={isActionLoading}
           >
             {showAddressForm ? "Cancel" : "Add New Address"}
           </button>
@@ -301,6 +363,7 @@ const Checkout = () => {
                 value={newAddress.name}
                 onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
                 required
+                disabled={isActionLoading}
               />
               <input
                 type="text"
@@ -309,6 +372,7 @@ const Checkout = () => {
                 value={newAddress.addressLine1}
                 onChange={(e) => setNewAddress({ ...newAddress, addressLine1: e.target.value })}
                 required
+                disabled={isActionLoading}
               />
               <input
                 type="text"
@@ -316,12 +380,14 @@ const Checkout = () => {
                 className="w-full p-2 mb-3 border rounded"
                 value={newAddress.addressLine2}
                 onChange={(e) => setNewAddress({ ...newAddress, addressLine2: e.target.value })}
+                disabled={isActionLoading}
               />
               <select
                 className="w-full p-2 mb-3 border rounded"
                 value={newAddress.country}
                 onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
                 required
+                disabled={isActionLoading}
               >
                 <option value="">Select Country</option>
                 {countries.map((country) => (
@@ -335,7 +401,7 @@ const Checkout = () => {
                 value={newAddress.state}
                 onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
                 required
-                disabled={!newAddress.country}
+                disabled={!newAddress.country || isActionLoading}
               >
                 <option value="">Select State</option>
                 {states.map((state) => (
@@ -349,7 +415,7 @@ const Checkout = () => {
                 value={newAddress.city}
                 onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
                 required
-                disabled={!newAddress.state}
+                disabled={!newAddress.state || isActionLoading}
               >
                 <option value="">Select City</option>
                 {cities.map((city) => (
@@ -365,6 +431,7 @@ const Checkout = () => {
                 value={newAddress.postalCode}
                 onChange={(e) => setNewAddress({ ...newAddress, postalCode: e.target.value })}
                 required
+                disabled={isActionLoading}
               />
               <input
                 type="text"
@@ -373,6 +440,7 @@ const Checkout = () => {
                 value={newAddress.phone}
                 onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
                 required
+                disabled={isActionLoading}
               />
               <label className="flex items-center mb-3">
                 <input
@@ -380,14 +448,16 @@ const Checkout = () => {
                   checked={newAddress.isDefault}
                   onChange={(e) => setNewAddress({ ...newAddress, isDefault: e.target.checked })}
                   className="mr-2"
+                  disabled={isActionLoading}
                 />
                 Set as default address
               </label>
               <button
                 type="submit"
                 className="w-full p-2 text-white bg-yellow-500 rounded hover:bg-yellow-600"
+                disabled={isActionLoading}
               >
-                Save Address
+                {isActionLoading ? "Saving..." : "Save Address"}
               </button>
             </form>
           )}
@@ -396,9 +466,9 @@ const Checkout = () => {
         <div className="lg:w-80">
           <div className="p-6 bg-white border rounded-lg shadow-sm">
             <h2 className="mb-4 text-lg font-semibold text-gray-900">Order Summary</h2>
-            {cart.map((item) => (
+            {items.map((item, index) => (
               <div
-                key={item.jewelryId._id || item.jewelryId}
+                key={item.jewelryId?._id || item.jewelryId || index}
                 className="flex items-center mb-4"
               >
                 <img
@@ -421,11 +491,15 @@ const Checkout = () => {
               <span>₹{subtotal.toFixed(2)}</span>
             </div>
             <button
-              className="w-full px-6 py-3 mt-4 text-lg font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
+              className={`w-full px-6 py-3 mt-4 text-lg font-medium text-white rounded-md ${
+                isActionLoading || !selectedAddress || !razorpayLoaded
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-yellow-500 hover:bg-yellow-600"
+              }`}
               onClick={handleCheckout}
-              disabled={!selectedAddress}
+              disabled={isActionLoading || !selectedAddress || !razorpayLoaded}
             >
-              Proceed to Payment
+              {isActionLoading ? "Processing..." : "Proceed to Payment"}
             </button>
           </div>
         </div>

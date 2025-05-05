@@ -1,46 +1,80 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Wishlist = () => {
   const navigate = useNavigate();
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isActionLoading, setIsActionLoading] = useState(false); // For remove/clear actions
+
+  const fetchWishlist = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Please log in to view your wishlist");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/wishlist", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setWishlist(data.items || []);
+        setError(null); // Clear any previous errors
+      } else {
+        setError(data.message || "Failed to load wishlist");
+      }
+    } catch (err) {
+      setError("Error loading wishlist. Retrying...");
+      // Retry once after a delay
+      setTimeout(async () => {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await fetch("https://mahesh-gems-api.vercel.app/api/wishlist", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          const data = await response.json();
+          if (response.ok) {
+            setWishlist(data.items || []);
+            setError(null);
+          } else {
+            setError(data.message || "Failed to load wishlist");
+          }
+        } catch (retryErr) {
+          setError("Error loading wishlist after retry");
+        }
+      }, 2000);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchWishlist = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("Please log in to view your wishlist");
-          setLoading(false);
-          return;
-        }
+    fetchWishlist();
 
-        const response = await fetch("https://mahesh-gems-api.vercel.app/api/wishlist", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-          setWishlist(data.items || []);
-        } else {
-          setError(data.message || "Failed to load wishlist");
-        }
-      } catch (err) {
-        setError("Error loading wishlist");
-      } finally {
-        setLoading(false);
-      }
+    // Listen for wishlist updates from other components
+    const handleWishlistUpdate = () => {
+      fetchWishlist();
     };
 
-    fetchWishlist();
+    window.addEventListener("wishlistUpdated", handleWishlistUpdate);
+
+    return () => {
+      window.removeEventListener("wishlistUpdated", handleWishlistUpdate);
+    };
   }, []);
 
   const handleRemove = async (jewelryId) => {
     try {
+      setIsActionLoading(true);
       const token = localStorage.getItem("token");
       const response = await fetch(`https://mahesh-gems-api.vercel.app/api/wishlist/${jewelryId}`, {
         method: "DELETE",
@@ -58,11 +92,14 @@ const Wishlist = () => {
       }
     } catch (err) {
       alert("Error removing from wishlist");
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
   const handleAddToCart = async (jewelryId) => {
     try {
+      setIsActionLoading(true);
       const token = localStorage.getItem("token");
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "POST",
@@ -84,6 +121,8 @@ const Wishlist = () => {
     } catch (err) {
       console.error(err);
       alert("Error adding to cart");
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -91,6 +130,7 @@ const Wishlist = () => {
     if (!window.confirm("Are you sure you want to clear your wishlist?")) return;
 
     try {
+      setIsActionLoading(true);
       const token = localStorage.getItem("token");
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/wishlist", {
         method: "DELETE",
@@ -108,6 +148,8 @@ const Wishlist = () => {
       }
     } catch (err) {
       alert("Error clearing wishlist");
+    } finally {
+      setIsActionLoading(false);
     }
   };
 
@@ -141,9 +183,9 @@ const Wishlist = () => {
             <button
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
               onClick={handleClearWishlist}
-              disabled={loading}
+              disabled={isActionLoading}
             >
-              {loading ? "Clearing..." : "Clear Wishlist"}
+              {isActionLoading ? "Clearing..." : "Clear Wishlist"}
             </button>
           )}
           <button
@@ -177,22 +219,25 @@ const Wishlist = () => {
                 className="object-contain w-24 h-24 mr-4 rounded"
               />
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600">
-                  {item.title}
-                </h2>
+                <Link to={`/jewelry/${item.jewelryId._id || item.jewelryId}`}>
+                  <h2 className="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600">
+                    {item.title}
+                  </h2>
+                </Link>
                 <p className="text-sm text-gray-500">In Stock</p>
                 <p className="mt-1 text-lg font-bold text-gray-900">₹{item.price}</p>
                 <div className="flex mt-2 space-x-2">
                   <button
                     className="px-4 py-1.5 text-sm font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
                     onClick={() => handleAddToCart(item.jewelryId._id || item.jewelryId)}
+                    disabled={isActionLoading}
                   >
                     Add to Cart
                   </button>
                   <button
                     className="px-4 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
                     onClick={() => handleRemove(item.jewelryId._id || item.jewelryId)}
-                    disabled={loading}
+                    disabled={isActionLoading}
                   >
                     Delete
                   </button>
