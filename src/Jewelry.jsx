@@ -132,6 +132,7 @@ const Jewelry = () => {
                       <option value="earring">Earrings</option>
                       <option value="bracelet">Bracelets</option>
                       <option value="pendant">Pendants</option>
+                      <option value="ring">Rings</option>
                     </optgroup>
                   </select>
                 </div>
