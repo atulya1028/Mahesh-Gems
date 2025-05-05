@@ -88,6 +88,8 @@ const JewelryDetail = () => {
         return;
       }
 
+      console.log("Adding to cart:", { jewelryId: id, quantity: parsedQuantity }); // Debug
+
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "POST",
         headers: {
@@ -98,6 +100,8 @@ const JewelryDetail = () => {
       });
 
       const data = await response.json();
+      console.log("Add to cart response:", data); // Debug
+
       if (response.ok) {
         window.dispatchEvent(new CustomEvent("cartUpdated"));
         alert("Added to cart!");
@@ -106,8 +110,8 @@ const JewelryDetail = () => {
         alert(data.message || "Failed to add to cart");
       }
     } catch (err) {
-      console.error("Error adding to cart:", err);
-      alert("Error adding to cart");
+      console.error("Error adding to cart:", err); // Debug
+      alert("Error adding to cart: " + err.message);
     }
   };
 

@@ -21,21 +21,36 @@ const Cart = () => {
         return;
       }
 
-      const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
+      console.log("Fetching cart for user with token:", token); // Debug
+
+      const fetchWithRetry = async (url, options, retries = 1) => {
+        try {
+          const response = await fetch(url, options);
+          if (!response.ok) throw new Error((await response.json()).message || "Request failed");
+          return response.json();
+        } catch (err) {
+          if (retries > 0) {
+            console.log("Retrying fetchCart, attempts left:", retries); // Debug
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            return fetchWithRetry(url, options, retries - 1);
+          }
+          throw err;
+        }
+      };
+
+      const response = await fetchWithRetry("https://mahesh-gems-api.vercel.app/api/cart", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        setCart(data.items || []);
-        setError(null);
-      } else {
-        setError(data.message || "Failed to load cart");
-      }
+      console.log("Fetch cart response:", response); // Debug
+
+      setCart(response.items || []);
+      setError(null);
     } catch (err) {
-      setError("Error loading cart");
+      console.error("Error fetching cart:", err); // Debug
+      setError(err.message || "Error loading cart");
     } finally {
       setLoading(false);
     }
@@ -46,6 +61,7 @@ const Cart = () => {
     fetchCart();
 
     const handleCartUpdate = () => {
+      console.log("Cart updated event received"); // Debug
       fetchCart();
     };
 
