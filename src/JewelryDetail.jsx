@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 const JewelryDetail = () => {
-  const { id } = useParams(); // Get jewelryId from URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const [jewelry, setJewelry] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0); // For carousel
-  const [quantity, setQuantity] = useState(1); // For cart quantity
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const fetchJewelry = async () => {
@@ -30,7 +30,6 @@ const JewelryDetail = () => {
     fetchJewelry();
   }, [id]);
 
-  // Combine images and videos into a single media array for the carousel
   const media = jewelry ? [...(jewelry.images || []), ...(jewelry.videos || [])] : [];
 
   const handleNextMedia = () => {
@@ -62,7 +61,7 @@ const JewelryDetail = () => {
       const data = await response.json();
       if (response.ok) {
         alert("Added to wishlist!");
-        window.dispatchEvent(new CustomEvent("wishlistUpdated")); // Notify Wishlist.jsx to refresh
+        window.dispatchEvent(new CustomEvent("wishlistUpdated"));
       } else {
         alert(data.message || "Failed to add to wishlist");
       }
@@ -80,15 +79,12 @@ const JewelryDetail = () => {
         return;
       }
 
-      // Ensure quantity is a valid integer >= 1
       const parsedQuantity = parseInt(quantity);
       if (isNaN(parsedQuantity) || parsedQuantity < 1) {
         alert("Please select a valid quantity (minimum 1)");
-        setQuantity(1); // Reset to default
+        setQuantity(1);
         return;
       }
-
-      console.log("Adding to cart:", { jewelryId: id, quantity: parsedQuantity }); // Debug
 
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "POST",
@@ -100,8 +96,6 @@ const JewelryDetail = () => {
       });
 
       const data = await response.json();
-      console.log("Add to cart response:", data); // Debug
-
       if (response.ok) {
         window.dispatchEvent(new CustomEvent("cartUpdated"));
         alert("Added to cart!");
@@ -110,7 +104,6 @@ const JewelryDetail = () => {
         alert(data.message || "Failed to add to cart");
       }
     } catch (err) {
-      console.error("Error adding to cart:", err); // Debug
       alert("Error adding to cart: " + err.message);
     }
   };
@@ -122,19 +115,15 @@ const JewelryDetail = () => {
       return;
     }
 
-    // Ensure quantity is a valid integer >= 1
     const parsedQuantity = parseInt(quantity);
     if (isNaN(parsedQuantity) || parsedQuantity < 1) {
       alert("Please select a valid quantity (minimum 1)");
-      setQuantity(1); // Reset to default
+      setQuantity(1);
       return;
     }
 
-    // Add the item to the cart
     try {
       const token = localStorage.getItem("token");
-      console.log("Adding to cart for Buy Now:", { jewelryId: id, quantity: parsedQuantity }); // Debug
-
       const response = await fetch("https://mahesh-gems-api.vercel.app/api/cart", {
         method: "POST",
         headers: {
@@ -145,22 +134,17 @@ const JewelryDetail = () => {
       });
 
       const data = await response.json();
-      console.log("Buy Now - Add to cart response:", data); // Debug
-
       if (!response.ok) {
         alert(data.message || "Failed to add to cart for Buy Now");
         return;
       }
 
       window.dispatchEvent(new CustomEvent("cartUpdated"));
-      console.log("Cart updated event dispatched for Buy Now"); // Debug
     } catch (err) {
-      console.error("Error adding to cart for Buy Now:", err); // Debug
       alert("Error adding to cart for Buy Now: " + err.message);
       return;
     }
 
-    // Navigate to checkout with the item details
     navigate("/checkout", {
       state: {
         buyNowItem: {
@@ -176,13 +160,17 @@ const JewelryDetail = () => {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-lg text-gray-600">
+        Loading...
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="container px-4 mx-auto mt-6 font-sans">
-        <p className="text-red-500">{error}</p>
+      <div className="container px-4 py-8 mx-auto">
+        <p className="text-lg text-red-600">{error}</p>
         <button
           className="mt-4 text-sm text-blue-600 hover:underline"
           onClick={() => navigate("/")}
@@ -195,8 +183,8 @@ const JewelryDetail = () => {
 
   if (!jewelry) {
     return (
-      <div className="container px-4 mx-auto mt-6 font-sans">
-        <p className="text-gray-600">Jewelry item not found.</p>
+      <div className="container px-4 py-8 mx-auto">
+        <p className="text-lg text-gray-600">Jewelry item not found.</p>
         <button
           className="mt-4 text-sm text-blue-600 hover:underline"
           onClick={() => navigate("/")}
@@ -211,37 +199,37 @@ const JewelryDetail = () => {
   const isVideo = currentMedia && (currentMedia.endsWith(".mp4") || currentMedia.endsWith(".webm") || currentMedia.endsWith(".ogg"));
 
   return (
-    <div className="container px-4 mx-auto mt-6 font-sans">
-      <div className="flex flex-col gap-8 lg:flex-row">
+    <div className="container px-4 py-8 mx-auto font-sans">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Media Carousel */}
-        <div className="lg:w-1/2">
-          <div className="relative">
+        <div className="lg:col-span-1">
+          <div className="relative bg-white rounded-lg shadow-sm">
             {media.length > 0 ? (
               <>
                 {isVideo ? (
                   <video
                     src={currentMedia}
                     controls
-                    className="object-contain w-full rounded-lg h-96"
+                    className="w-full h-[400px] object-contain rounded-t-lg"
                   />
                 ) : (
                   <img
                     src={currentMedia}
                     alt={jewelry.title}
-                    className="object-contain w-full rounded-lg h-96"
+                    className="w-full h-[400px] object-contain rounded-t-lg"
                   />
                 )}
                 {media.length > 1 && (
                   <>
                     <button
                       onClick={handlePrevMedia}
-                      className="absolute p-2 text-white transform -translate-y-1/2 bg-gray-800 rounded-full left-2 top-1/2 hover:bg-gray-700"
+                      className="absolute p-2 text-white transition transform -translate-y-1/2 bg-gray-800 rounded-full top-1/2 left-2 hover:bg-gray-700"
                     >
                       ←
                     </button>
                     <button
                       onClick={handleNextMedia}
-                      className="absolute p-2 text-white transform -translate-y-1/2 bg-gray-800 rounded-full right-2 top-1/2 hover:bg-gray-700"
+                      className="absolute p-2 text-white transition transform -translate-y-1/2 bg-gray-800 rounded-full top-1/2 right-2 hover:bg-gray-700"
                     >
                       →
                     </button>
@@ -249,95 +237,172 @@ const JewelryDetail = () => {
                 )}
               </>
             ) : (
-              <div className="flex items-center justify-center w-full bg-gray-100 rounded-lg h-96">
+              <div className="flex items-center justify-center w-full h-[400px] bg-gray-100 rounded-t-lg">
                 <p className="text-gray-500">No media available</p>
               </div>
             )}
+            {/* Thumbnail Previews */}
+            {media.length > 1 && (
+              <div className="flex p-4 space-x-2 overflow-x-auto">
+                {media.map((item, index) => {
+                  const isThumbnailVideo = item.endsWith(".mp4") || item.endsWith(".webm") || item.endsWith(".ogg");
+                  return (
+                    <div
+                      key={index}
+                      onClick={() => setCurrentMediaIndex(index)}
+                      className={`w-16 h-16 flex-shrink-0 rounded-md cursor-pointer border-2 ${
+                        index === currentMediaIndex ? "border-blue-500" : "border-gray-200"
+                      } hover:border-blue-400 transition`}
+                    >
+                      {isThumbnailVideo ? (
+                        <video
+                          src={item}
+                          className="object-cover w-full h-full rounded-md"
+                          muted
+                        />
+                      ) : (
+                        <img
+                          src={item}
+                          alt={`Thumbnail ${index}`}
+                          className="object-cover w-full h-full rounded-md"
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-          {/* Thumbnail Previews */}
-          {media.length > 1 && (
-            <div className="flex mt-4 space-x-2 overflow-x-auto">
-              {media.map((item, index) => {
-                const isThumbnailVideo = item.endsWith(".mp4") || item.endsWith(".webm") || item.endsWith(".ogg");
-                return (
-                  <div
-                    key={index}
-                    onClick={() => setCurrentMediaIndex(index)}
-                    className={`w-20 h-20 flex-shrink-0 rounded-lg cursor-pointer border-2 ${
-                      index === currentMediaIndex ? "border-blue-500" : "border-transparent"
-                    }`}
-                  >
-                    {isThumbnailVideo ? (
-                      <video
-                        src={item}
-                        className="object-cover w-full h-full rounded-lg"
-                        muted
-                      />
-                    ) : (
-                      <img
-                        src={item}
-                        alt={`Thumbnail ${index}`}
-                        className="object-cover w-full h-full rounded-lg"
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
 
-        {/* Jewelry Details */}
-        <div className="lg:w-1/2">
-          <h1 className="text-3xl font-bold text-gray-900">{jewelry.title}</h1>
-          <p className="mt-2 text-sm text-gray-500">In Stock</p>
-          <p className="mt-2 text-2xl font-bold text-gray-900">₹{jewelry.price}</p>
-          <p className="mt-4 text-gray-600">{jewelry.description}</p>
-
-          {/* Quantity Selector */}
-          <div className="flex items-center mt-6 space-x-4">
-            <label htmlFor="quantity" className="text-sm font-medium text-gray-700">
-              Quantity:
-            </label>
-            <input
-              type="number"
-              id="quantity"
-              min="1"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-16 p-2 text-center border rounded-md"
-            />
+        {/* Product Details */}
+        <div className="lg:col-span-1">
+          <h1 className="mb-2 text-2xl font-bold text-gray-900">{jewelry.title}</h1>
+          <div className="flex items-center mb-2">
+            <div className="flex text-yellow-400">
+              {[...Array(5)].map((_, i) => (
+                <svg
+                  key={i}
+                  className={`w-5 h-5 ${i < 4 ? "fill-current" : "text-gray-300"}`}
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M10 15l-5.5 3 1.5-5.5L2 8.5l5.5-.5L10 3l2.5 5 5.5.5-4 4 1.5 5.5z" />
+                </svg>
+              ))}
+            </div>
+            <span className="ml-2 text-sm text-blue-600 cursor-pointer hover:underline">
+              1,234 ratings
+            </span>
           </div>
+          <p className="mb-2 text-sm text-green-600">In Stock</p>
+          <p className="mb-4 text-3xl font-bold text-gray-900">₹{jewelry.price}</p>
+          <p className="mb-4 text-gray-600">{jewelry.description}</p>
 
-          {/* Action Buttons */}
-          <div className="flex mt-6 space-x-4">
-            <button
-              onClick={handleAddToCart}
-              className="px-6 py-2 text-sm font-medium text-white bg-yellow-500 rounded-md hover:bg-yellow-600"
-            >
-              Add to Cart
-            </button>
-            <button
-              onClick={handleBuyNow}
-              className="px-6 py-2 text-sm font-medium text-white bg-green-500 rounded-md hover:bg-green-600"
-            >
-              Buy Now
-            </button>
-            <button
-              onClick={handleAddToWishlist}
-              className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-            >
-              Add to Wishlist
-            </button>
+          {/* Product Highlights */}
+          <div className="mb-6">
+            <h3 className="mb-2 text-lg font-semibold text-gray-900">Product Highlights</h3>
+            <ul className="pl-5 text-sm text-gray-600 list-disc">
+              <li>Premium quality craftsmanship</li>
+              <li>Made with authentic gemstones</li>
+              <li>Perfect for gifting or personal use</li>
+              <li>Free shipping on orders over ₹500</li>
+            </ul>
           </div>
 
           {/* Back to Shopping */}
           <button
             onClick={() => navigate(-1)}
-            className="mt-4 text-sm text-blue-600 hover:underline"
+            className="text-sm text-blue-600 hover:underline"
           >
             Back to Shopping
           </button>
+        </div>
+
+        {/* Action Sidebar */}
+        <div className="lg:col-span-1">
+          <div className="sticky p-6 bg-white border border-gray-200 rounded-lg shadow-sm top-4">
+            <p className="mb-4 text-2xl font-bold text-gray-900">₹{jewelry.price}</p>
+            <p className="mb-4 text-sm text-gray-600">FREE delivery by Tomorrow</p>
+
+            {/* Quantity Selector */}
+            <div className="flex items-center mb-4">
+              <label htmlFor="quantity" className="mr-2 text-sm text-gray-700">
+                Qty:
+              </label>
+              <input
+                type="number"
+                id="quantity"
+                min="1"
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-16 p-2 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <button
+              onClick={handleAddToCart}
+              className="w-full py-2 mb-2 font-medium text-gray-900 transition bg-yellow-400 rounded-md hover:bg-yellow-500"
+            >
+              Add to Cart
+            </button>
+            <button
+              onClick={handleBuyNow}
+              className="w-full py-2 mb-2 font-medium text-gray-900 transition bg-yellow-600 rounded-md hover:bg-yellow-700"
+            >
+              Buy Now
+            </button>
+            <button
+              onClick={handleAddToWishlist}
+              className="w-full py-2 font-medium text-gray-700 transition bg-white border border-gray-300 rounded-md hover:bg-gray-100"
+            >
+              Add to Wishlist
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Frequently Bought Together */}
+      <div className="mt-12">
+        <h3 className="mb-4 text-xl font-semibold text-gray-900">Frequently Bought Together</h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+              <img
+                src="https://via.placeholder.com/150?text=Product"
+                alt="Related Product"
+                className="object-contain w-full h-40 mb-2"
+              />
+              <p className="text-sm font-medium text-gray-900">Related Jewelry Item</p>
+              <p className="text-sm text-gray-600">₹1,999</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Customer Reviews */}
+      <div className="mt-12">
+        <h3 className="mb-4 text-xl font-semibold text-gray-900">Customer Reviews</h3>
+        <div className="space-y-4">
+          <div className="pb-4 border-b border-gray-200">
+            <div className="flex items-center mb-2">
+              <div className="flex text-yellow-400">
+                {[...Array(5)].map((_, i) => (
+                  <svg
+                    key={i}
+                    className={`w-4 h-4 ${i < 4 ? "fill-current" : "text-gray-300"}`}
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 15l-5.5 3 1.5-5.5L2 8.5l5.5-.5L10 3l2.5 5 5.5.5-4 4 1.5 5.5z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="ml-2 text-sm text-gray-600">Verified Purchase</span>
+            </div>
+            <p className="text-sm text-gray-600">
+              Beautiful piece of jewelry! The quality is amazing and it arrived quickly.
+            </p>
+          </div>
         </div>
       </div>
     </div>
