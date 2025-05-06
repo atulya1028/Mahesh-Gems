@@ -310,7 +310,6 @@ const JewelryDetail = () => {
         <div className="lg:col-span-1">
           <div className="sticky p-6 bg-white border border-gray-200 rounded-lg shadow-sm top-4">
             <p className="mb-4 text-2xl font-bold text-gray-900">₹{jewelry.price}</p>
-            <p className="mb-4 text-sm text-gray-600">FREE delivery by Tomorrow</p>
 
             {/* Quantity Selector (Repeated for Sidebar) */}
             <div className="flex items-center mb-4">
