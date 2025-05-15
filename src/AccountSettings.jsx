@@ -16,22 +16,77 @@ const AccountSettings = () => {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check login status and fetch user data
+  // Fetch profile data on mount
   useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (loggedIn && userData) {
-      setIsLoggedIn(true);
-      setUser(userData);
-      setFormData({
-        name: userData.name || "",
-        email: userData.email || "",
-        password: "",
-        confirmPassword: "",
-      });
-    } else {
-      navigate("/login");
-    }
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("token");
+      const loggedIn = localStorage.getItem("isLoggedIn") === "true";
+
+      if (!loggedIn || !token) {
+        setError("Please log in to access account settings");
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await fetch("https://mahesh-gems.vercel.app/api/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 401) {
+          const newToken = await refreshAccessToken();
+          if (newToken) {
+            const retryResponse = await fetch("https://mahesh-gems.vercel.app/api/auth/me", {
+              headers: {
+                Authorization: `Bearer ${newToken}`,
+              },
+            });
+            if (retryResponse.ok) {
+              const data = await retryResponse.json();
+              setUser(data);
+              setFormData({
+                name: data.name || "",
+                email: data.email || "",
+                password: "",
+                confirmPassword: "",
+              });
+              localStorage.setItem("user", JSON.stringify(data));
+              setIsLoggedIn(true);
+            } else {
+              throw new Error("Failed to fetch profile after token refresh");
+            }
+          } else {
+            navigate("/login");
+            return;
+          }
+        } else if (response.ok) {
+          const data = await response.json();
+          setUser(data);
+          setFormData({
+            name: data.name || "",
+            email: data.email || "",
+            password: "",
+            confirmPassword: "",
+          });
+          localStorage.setItem("user", JSON.stringify(data));
+          setIsLoggedIn(true);
+        } else {
+          const data = await response.json();
+          throw new Error(data.message || "Failed to fetch profile");
+        }
+      } catch (err) {
+        setError(err.message || "An error occurred while fetching profile");
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("user");
+        navigate("/login");
+      }
+    };
+
+    fetchProfile();
   }, [navigate]);
 
   const handleInputChange = (e) => {
@@ -49,7 +104,7 @@ const AccountSettings = () => {
         throw new Error("No refresh token available");
       }
 
-      const response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/refresh-token", {
+      const response = await fetch("https://mahesh-gems.vercel.app/api/auth/refresh-token", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +125,6 @@ const AccountSettings = () => {
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("user");
-      navigate("/login");
       return null;
     }
   };
@@ -115,7 +169,7 @@ const AccountSettings = () => {
     }
 
     try {
-      let response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/me", {
+      let response = await fetch("https://mahesh-gems.vercel.app/api/auth/me", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -128,8 +182,7 @@ const AccountSettings = () => {
       if (response.status === 401) {
         token = await refreshAccessToken();
         if (token) {
-          // Retry the request with the new token
-          response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/me", {
+          response = await fetch("https://mahesh-gems.vercel.app/api/auth/me", {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -139,6 +192,7 @@ const AccountSettings = () => {
           });
         } else {
           setError("Session expired. Please log in again.");
+          navigate("/login");
           setIsLoading(false);
           return;
         }
@@ -154,15 +208,14 @@ const AccountSettings = () => {
           password: "",
           confirmPassword: "",
         });
-        setSuccess("Profile updated successfully.");
+        setSuccess("✅ Profile updated successfully.");
         window.dispatchEvent(new CustomEvent("loginSuccess"));
       } else {
         setError(data.message || "Failed to update profile.");
-        console.error("API Error:", data);
       }
     } catch (err) {
-      console.error("Fetch Error:", err);
       setError("An error occurred. Please try again.");
+      console.error("Fetch Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -221,6 +274,7 @@ const AccountSettings = () => {
                 className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 aria-label="Full name"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -244,6 +298,7 @@ const AccountSettings = () => {
                 className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 aria-label="Email address"
                 required
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -266,6 +321,7 @@ const AccountSettings = () => {
                 onChange={handleInputChange}
                 className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 aria-label="New password"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -273,8 +329,6 @@ const AccountSettings = () => {
           <div className="mb-6">
             <label htmlFor="confirmPassword" className="block mb-1 text-sm font-medium text-gray-700">
               Confirm New Password
- “
-
             </label>
             <div className="relative">
               <Lock
@@ -290,6 +344,7 @@ const AccountSettings = () => {
                 onChange={handleInputChange}
                 className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 aria-label="Confirm new password"
+                disabled={isLoading}
               />
             </div>
           </div>

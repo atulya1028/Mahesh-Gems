@@ -1,105 +1,127 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Mail, Lock } from "lucide-react";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
     try {
-      const response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/login", {
+      const response = await fetch("https://mahesh-gems.vercel.app/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-
-      if (response.ok && data.token && data.user) {
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("user", JSON.stringify(data.user));
+      if (response.ok) {
         localStorage.setItem("token", data.token);
-
+        localStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("isLoggedIn", "true");
         window.dispatchEvent(new CustomEvent("loginSuccess"));
-        navigate("/");
+        navigate("/account");
       } else {
-        setErrorMessage(data.message || "Invalid credentials. Please try again.");
+        setError(data.message || "Invalid email or password");
       }
-    } catch (error) {
-      setErrorMessage("Error logging in. Please try again later.");
-      console.error(error);
+    } catch (err) {
+      setError("Unable to connect to the server. Please try again.");
+      console.error("Login Error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
-
-  // Optional: Explicitly handle Enter key on inputs (uncomment if needed)
-  /*
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" || e.key === "Return") {
-      handleLogin(e);
-    }
-  };
-  */
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-4 bg-gray-50">
-      <form
-        onSubmit={handleLogin}
-        className="w-full max-w-md p-6 bg-white rounded-lg shadow"
-        aria-label="Login form"
-      >
-        <h2 className="mb-6 text-2xl font-semibold text-center">Login</h2>
+    <div className="container min-h-screen px-4 mx-auto mt-6 font-montserrat">
+      <h1 className="mb-6 text-3xl font-bold text-gray-900">Login</h1>
 
-        {errorMessage && (
-          <div className="mb-4 text-sm text-red-500">{errorMessage}</div>
+      <div className="max-w-lg p-6 mx-auto bg-white rounded-lg shadow-sm">
+        <h2 className="mb-4 text-xl font-semibold text-gray-900">Sign In</h2>
+
+        {error && (
+          <div className="mb-4 text-sm text-red-500" aria-live="assertive">
+            {error}
+          </div>
         )}
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 mb-4 border rounded"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          aria-label="Email address"
-          // onKeyDown={handleKeyDown} // Uncomment if using explicit keydown handler
-        />
+        <form onSubmit={handleSubmit} aria-label="Login form">
+          <div className="mb-4">
+            <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700">
+              Email Address
+            </label>
+            <div className="relative">
+              <Mail
+                size={20}
+                className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2"
+                aria-hidden="true"
+              />
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                aria-label="Email address"
+                required
+                disabled={isLoading}
+              />
+            </div>
+          </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 mb-4 border rounded"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          aria-label="Password"
-          // onKeyDown={handleKeyDown} // Uncomment if using explicit keydown handler
-        />
+          <div className="mb-6">
+            <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <div className="relative">
+              <Lock
+                size={20}
+                className="absolute text-gray-400 transform -translate-y-1/2 left-3 top-1/2"
+                aria-hidden="true"
+              />
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full py-2 pl-10 pr-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                aria-label="Password"
+                required
+                disabled={isLoading}
+              />
+            </div>
+          </div>
 
-        <button
-          type="submit"
-          className="w-full p-2 text-white bg-yellow-600 rounded hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
-          aria-label="Submit login"
-        >
-          Login
-        </button>
+          <button
+            type="submit"
+            className="w-full p-2 text-white bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 disabled:opacity-50"
+            disabled={isLoading}
+            aria-label="Sign in"
+          >
+            {isLoading ? "Signing In..." : "Sign In"}
+          </button>
+        </form>
 
-        <div className="flex justify-between mt-4 text-sm">
-          <Link to="/forgot-password" className="text-blue-600 hover:underline">
-            Forgot password?
-          </Link>
-          <span>
-            Not a user?{" "}
-            <Link to="/signup" className="text-blue-600 hover:underline">
-              Please Sign up
-            </Link>
-          </span>
+        <div className="mt-4 text-center">
+          <a href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+            Forgot Password?
+          </a>
+          <p className="mt-2 text-sm">
+            Don't have an account?{" "}
+            <a href="/signup" className="text-blue-600 hover:underline">
+              Sign Up
+            </a>
+          </p>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
