@@ -41,12 +41,47 @@ const AccountSettings = () => {
     setSuccess("");
   };
 
+  // Refresh token function
+  const refreshAccessToken = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (!refreshToken) {
+        throw new Error("No refresh token available");
+      }
+
+      const response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/refresh-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem("token", data.token);
+        return data.token;
+      } else {
+        throw new Error(data.message || "Failed to refresh token");
+      }
+    } catch (err) {
+      console.error("Refresh Token Error:", err);
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("user");
+      navigate("/login");
+      return null;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
     setIsLoading(true);
 
+    // Validate inputs
     if (!formData.name || !formData.email) {
       setError("Name and email are required.");
       setIsLoading(false);
@@ -57,25 +92,30 @@ const AccountSettings = () => {
       setIsLoading(false);
       return;
     }
+    if (formData.password && formData.password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      setIsLoading(false);
+      return;
+    }
+
+    let token = localStorage.getItem("token");
+    if (!token) {
+      setError("Please log in again.");
+      navigate("/login");
+      setIsLoading(false);
+      return;
+    }
+
+    const updateData = {
+      name: formData.name,
+      email: formData.email,
+    };
+    if (formData.password) {
+      updateData.password = formData.password;
+    }
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("Please log in again.");
-        navigate("/login");
-        setIsLoading(false);
-        return;
-      }
-
-      const updateData = {
-        name: formData.name,
-        email: formData.email,
-      };
-      if (formData.password) {
-        updateData.password = formData.password;
-      }
-
-      const response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/profile", {
+      let response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -83,6 +123,26 @@ const AccountSettings = () => {
         },
         body: JSON.stringify(updateData),
       });
+
+      // Handle 401 Unauthorized (token expired)
+      if (response.status === 401) {
+        token = await refreshAccessToken();
+        if (token) {
+          // Retry the request with the new token
+          response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/profile", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(updateData),
+          });
+        } else {
+          setError("Session expired. Please log in again.");
+          setIsLoading(false);
+          return;
+        }
+      }
 
       const data = await response.json();
       if (response.ok) {
@@ -213,6 +273,8 @@ const AccountSettings = () => {
           <div className="mb-6">
             <label htmlFor="confirmPassword" className="block mb-1 text-sm font-medium text-gray-700">
               Confirm New Password
+ “
+
             </label>
             <div className="relative">
               <Lock
