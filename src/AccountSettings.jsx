@@ -115,7 +115,7 @@ const AccountSettings = () => {
     }
 
     try {
-      let response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/profile", {
+      let response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/me", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
