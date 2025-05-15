@@ -129,7 +129,7 @@ const AccountSettings = () => {
         token = await refreshAccessToken();
         if (token) {
           // Retry the request with the new token
-          response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/profile", {
+          response = await fetch("https://mahesh-gems-api.vercel.app/api/auth/me", {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
