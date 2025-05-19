@@ -77,7 +77,7 @@ const Login = () => {
 
         setSuccess("Login successful! Redirecting...");
         window.dispatchEvent(new CustomEvent("loginSuccess"));
-        setTimeout(() => navigate("/account"), 1000);
+        setTimeout(() => navigate("/"), 1000);
       } else {
         setError(data.message || "Invalid email or password");
       }
