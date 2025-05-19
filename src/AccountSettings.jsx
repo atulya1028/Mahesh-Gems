@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, Mail, Lock } from "lucide-react";
 
+const API_BASE_URL = "https://mahesh-gems-api.vercel.app";
+
 const AccountSettings = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -29,7 +31,7 @@ const AccountSettings = () => {
       }
 
       try {
-        const response = await fetch("https://mahesh-gems.vercel.app/api/auth/me", {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -38,7 +40,7 @@ const AccountSettings = () => {
         if (response.status === 401) {
           const newToken = await refreshAccessToken();
           if (newToken) {
-            const retryResponse = await fetch("https://mahesh-gems.vercel.app/api/auth/me", {
+            const retryResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
               headers: {
                 Authorization: `Bearer ${newToken}`,
               },
@@ -58,6 +60,7 @@ const AccountSettings = () => {
               throw new Error("Failed to fetch profile after token refresh");
             }
           } else {
+            setError("Session expired. Please log in again.");
             navigate("/login");
             return;
           }
@@ -104,7 +107,7 @@ const AccountSettings = () => {
         throw new Error("No refresh token available");
       }
 
-      const response = await fetch("https://mahesh-gems.vercel.app/api/auth/refresh-token", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/refresh-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -169,7 +172,7 @@ const AccountSettings = () => {
     }
 
     try {
-      let response = await fetch("https://mahesh-gems.vercel.app/api/auth/me", {
+      let response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -182,7 +185,7 @@ const AccountSettings = () => {
       if (response.status === 401) {
         token = await refreshAccessToken();
         if (token) {
-          response = await fetch("https://mahesh-gems.vercel.app/api/auth/me", {
+          response = await fetch(`${API_BASE_URL}/api/auth/me`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
